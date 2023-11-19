@@ -1,6 +1,6 @@
 # aipgcoin Service
 
-The aipgcoin Service is a Node.js interface to [aipgcoin](https://github.com/aipgproject/aipgcoin) for querying information about the aipgcoin block chain. It will manage starting and stopping `aipgd` or connect to several running `aipgd` processes. It uses a branch of a [branch of aipgcoin](https://github.com/underdarkskies/aipgcoin/tree/0.15.0-aipgcore/) with additional indexes for querying information about addresses and blocks. Results are cached for performance and there are several additional API methods added for common queries.
+The aipgcoin Service is a Node.js interface to [aipgcoin](https://github.com/AIPowerGrid/AI-Power-Grid-Core) for querying information about the aipgcoin block chain. It will manage starting and stopping `aipgd` or connect to several running `aipgd` processes. It uses a branch of a [branch of aipgcoin](https://github.com/underdarkskies/aipgcoin/tree/0.15.0-aipgcore/) with additional indexes for querying information about addresses and blocks. Results are cached for performance and there are several additional API methods added for common queries.
 
 ## Configuration
 
