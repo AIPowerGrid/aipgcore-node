@@ -3,7 +3,7 @@
 var should = require('chai').should();
 var sinon = require('sinon');
 var proxyquire = require('proxyquire');
-var RavencoinService = require('../../lib/services/ravend');
+var aipgcoinService = require('../../lib/services/aipgd');
 var index = require('../../lib');
 var log = index.log;
 
@@ -19,12 +19,12 @@ describe('#start', function() {
 
   describe('will dynamically create a node from a configuration', function() {
 
-    it('require each ravencore-node service with default config', function(done) {
+    it('require each aipgcore-node service with default config', function(done) {
       var node;
       var TestNode = function(options) {
         options.services[0].should.deep.equal({
-          name: 'ravend',
-          module: RavencoinService,
+          name: 'aipgd',
+          module: aipgcoinService,
           config: {
             spawn: {
               datadir: './data'
@@ -48,10 +48,10 @@ describe('#start', function() {
         path: __dirname,
         config: {
           services: [
-            'ravend'
+            'aipgd'
           ],
           servicesConfig: {
-            ravend: {
+            aipgd: {
               spawn: {
                 datadir: './data'
               }
@@ -87,12 +87,12 @@ describe('#start', function() {
         done();
       });
     });
-    it('require each ravencore-node service with explicit config', function(done) {
+    it('require each aipgcore-node service with explicit config', function(done) {
       var node;
       var TestNode = function(options) {
         options.services[0].should.deep.equal({
-          name: 'ravend',
-          module: RavencoinService,
+          name: 'aipgd',
+          module: aipgcoinService,
           config: {
             param: 'test',
             spawn: {
@@ -116,10 +116,10 @@ describe('#start', function() {
         path: __dirname,
         config: {
           services: [
-            'ravend'
+            'aipgd'
           ],
           servicesConfig: {
-            'ravend': {
+            'aipgd': {
               param: 'test',
               spawn: {
                 datadir: './data'

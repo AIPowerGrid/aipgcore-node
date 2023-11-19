@@ -6,7 +6,7 @@ module.exports.Service = require('./lib/service');
 module.exports.errors = require('./lib/errors');
 
 module.exports.services = {};
-module.exports.services.Ravencoin = require('./lib/services/ravend');
+module.exports.services.aipgcoin = require('./lib/services/aipgd');
 module.exports.services.Web = require('./lib/services/web');
 
 module.exports.scaffold = {};
@@ -21,7 +21,7 @@ module.exports.scaffold.defaultConfig = require('./lib/scaffold/default-config')
 module.exports.cli = {};
 module.exports.cli.main = require('./lib/cli/main');
 module.exports.cli.daemon = require('./lib/cli/daemon');
-module.exports.cli.ravencore = require('./lib/cli/ravencore');
-module.exports.cli.ravencored = require('./lib/cli/ravencored');
+module.exports.cli.aipgcore = require('./lib/cli/aipgcore');
+module.exports.cli.aipgcored = require('./lib/cli/aipgcored');
 
-module.exports.lib = require('ravencore-lib');
+module.exports.lib = require('aipgcore-lib');

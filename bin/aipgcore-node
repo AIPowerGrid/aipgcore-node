@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+
+var aipgcore = require('../lib/cli/aipgcore');
+aipgcore();

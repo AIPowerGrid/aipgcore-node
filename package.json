@@ -1,21 +1,21 @@
 {
-  "name": "ravencore-node",
-  "description": "Full node with extended capabilities using ravencore and Ravencoin",
+  "name": "aipgcore-node",
+  "description": "Full node with extended capabilities using aipgcore and aipgcoin",
   "author": "Under",
   "version": "1.0.3",
   "main": "./index.js",
-  "repository": "git://github.com/underdarkskies/ravencore-node.git",
-  "homepage": "https://github.com/underdarkskies/ravencore-node",
+  "repository": "git://github.com/underdarkskies/aipgcore-node.git",
+  "homepage": "https://github.com/underdarkskies/aipgcore-node",
   "bugs": {
-    "url": "https://github.com/underdarkskies/ravencore-node/issues"
+    "url": "https://github.com/underdarkskies/aipgcore-node/issues"
   },
   "bin": {
-    "ravencore-node": "./bin/ravencore-node",
-    "ravend": "./bin/ravend"
+    "aipgcore-node": "./bin/aipgcore-node",
+    "aipgd": "./bin/aipgd"
   },
   "scripts": {
     "preinstall": "./scripts/download",
-    "verify": "./scripts/download --skip-ravencoin-download --verify-ravencoin-download",
+    "verify": "./scripts/download --skip-aipgcoin-download --verify-aipgcoin-download",
     "test": "mocha -R spec --recursive",
     "regtest": "./scripts/regtest",
     "jshint": "jshint --reporter=node_modules/jshint-stylish ./lib",
@@ -23,13 +23,13 @@
     "coveralls": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- --recursive -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "tags": [
-    "ravencoin",
-    "ravend"
+    "aipgcoin",
+    "aipgd"
   ],
   "dependencies": {
     "async": "2.6.2",
-    "ravend-rpc": "underdarkskies/ravend-rpc",
-    "ravencore-lib": "underdarkskies/ravencore-lib",
+    "aipgd-rpc": "underdarkskies/aipgd-rpc",
+    "aipgcore-lib": "underdarkskies/aipgcore-lib",
     "body-parser": "1.18.3",
     "colors": "1.3.3",
     "commander": "2.20.0",
@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "benchmark": "1.0.0",
-    "ravencore-p2p": "underdarkskies/ravencore-p2p",
+    "aipgcore-p2p": "underdarkskies/aipgcore-p2p",
     "chai": "^4.1.2",
     "coveralls": "^3.0.1",
     "istanbul": "^0.4.3",
