@@ -39,7 +39,7 @@ There are several add-on services available to extend the functionality of aipgc
 
 - [Insight API](https://github.com/underdarkskies/insight-api)
 - [Insight UI](https://github.com/underdarkskies/insight-ui)
-- [aipgcore Wallet Service](https://github.com/underdarkskies/aipgcore-wallet-service)
+- [aipgcore Wallet Service](https://github.com/AIPowerGrid/aipgcore-wallet-service)
 
 ## Documentation
 
@@ -54,11 +54,11 @@ There are several add-on services available to extend the functionality of aipgc
 
 ## Contributing
 
-Please send pull requests for bug fixes, code optimization, and ideas for improvement. For more information on how to contribute, please refer to our [CONTRIBUTING](https://github.com/underdarkskies/aipgcore/blob/master/CONTRIBUTING.md) file.
+Please send pull requests for bug fixes, code optimization, and ideas for improvement. For more information on how to contribute, please refer to our [CONTRIBUTING](https://github.com/AIPowerGrid/aipgcore/blob/master/CONTRIBUTING.md) file.
 
 ## License
 
-Code released under [the MIT license](https://github.com/underdarkskies/aipgcore-node/blob/master/LICENSE).
+Code released under [the MIT license](https://github.com/AIPowerGrid/aipgcore-node/blob/master/LICENSE).
 
 Copyright 2018-2019 UnderDarkSkies
 

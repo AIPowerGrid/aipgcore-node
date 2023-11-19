@@ -20,8 +20,8 @@ Services correspond with a Node.js module as described in 'package.json', for ex
 ```json
 {
   "dependencies": {
-    "aipgcore-lib": "underdarkskies/aipgcore-lib",
-    "aipgcore-node": "underdarkskies/aipgcore-node",
+    "aipgcore-lib": "AIPowerGrid/aipgcore-lib",
+    "aipgcore-node": "AIPowerGrid/aipgcore-node",
     "insight-api": "underdarkskies/insight-api"
   }
 }

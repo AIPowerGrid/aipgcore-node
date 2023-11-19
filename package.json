@@ -4,10 +4,10 @@
   "author": "Under",
   "version": "1.0.3",
   "main": "./index.js",
-  "repository": "git://github.com/underdarkskies/aipgcore-node.git",
-  "homepage": "https://github.com/underdarkskies/aipgcore-node",
+  "repository": "git://github.com/AIPowerGrid/aipgcore-node.git",
+  "homepage": "https://github.com/AIPowerGrid/aipgcore-node",
   "bugs": {
-    "url": "https://github.com/underdarkskies/aipgcore-node/issues"
+    "url": "https://github.com/AIPowerGrid/aipgcore-node/issues"
   },
   "bin": {
     "aipgcore-node": "./bin/aipgcore-node",
@@ -28,8 +28,8 @@
   ],
   "dependencies": {
     "async": "2.6.2",
-    "aipgd-rpc": "underdarkskies/aipgd-rpc",
-    "aipgcore-lib": "underdarkskies/aipgcore-lib",
+    "aipgd-rpc": "AIPowerGrid/aipgd-rpc",
+    "aipgcore-lib": "AIPowerGrid/aipgcore-lib",
     "body-parser": "1.18.3",
     "colors": "1.3.3",
     "commander": "2.20.0",
@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "benchmark": "1.0.0",
-    "aipgcore-p2p": "underdarkskies/aipgcore-p2p",
+    "aipgcore-p2p": "AIPowerGrid/aipgcore-p2p",
     "chai": "^4.1.2",
     "coveralls": "^3.0.1",
     "istanbul": "^0.4.3",
