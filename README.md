@@ -38,7 +38,7 @@ This will create a directory with configuration files for your node and install 
 There are several add-on services available to extend the functionality of aipgcore:
 
 - [Insight API](https://github.com/underdarkskies/insight-api)
-- [Insight UI](https://github.com/underdarkskies/insight-ui)
+- [Insight UI](https://github.com/AIPowerGrid/aipg-insight-block-explorer)
 - [aipgcore Wallet Service](https://github.com/AIPowerGrid/aipgcore-wallet-service)
 
 ## Documentation
