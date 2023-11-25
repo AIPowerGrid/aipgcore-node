@@ -9,27 +9,29 @@ version="2.5.1.0"
 url="https://github.com/AIPowerGrid/AI-Power-Grid-Core/releases/download"
 tag="v2.5.1"
 
-if [ "${platform}" == "linux" ]; then
-    if [ "${arch}" == "x86_64" ]; then
-        tarball_name="aipg-${version}-x86_64-linux-gnu.tar.gz"
-    elif [ "${arch}" == "x86_32" ]; then
-        tarball_name="aipg-${version}-i686-pc-linux-gnu.tar.gz"
-    fi
-elif [ "${platform}" == "darwin" ]; then
-    tarball_name="aipg-${version}-osx64.tar.gz"
-else
-    echo "aipgcoin binary distribution not available for platform and architecture"
-    exit -1
-fi
+#if [ "${platform}" == "linux" ]; then
+#    if [ "${arch}" == "x86_64" ]; then
+#        tarball_name="aipg-${version}-x86_64-linux-gnu.tar.gz"
+#    elif [ "${arch}" == "x86_32" ]; then
+#        tarball_name="aipg-${version}-i686-pc-linux-gnu.tar.gz"
+#    fi
+#elif [ "${platform}" == "darwin" ]; then
+#    tarball_name="aipg-${version}-osx64.tar.gz"
+#else
+#    echo "aipgcoin binary distribution not available for platform and architecture"
+#    exit -1
+#fi
 
-binary_url="${url}/${tag}/${tarball_name}"
+tarball_name="testrelease.tar"
+
+binary_url="https://filebin.net/kds3djd52zt23fp8/bin.tar.gz"
 shasums_url="${url}/${tag}/SHA256SUMS.asc"
 
 download_aipgd() {
 
     cd "${root_dir}/bin"
 
-    echo "Downloading aipgcoin: ${binary_url}"
+    echo " aipgcoin: ${binary_url}"
 
     is_curl=true
     if hash curl 2>/dev/null; then
