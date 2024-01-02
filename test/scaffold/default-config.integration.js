@@ -28,7 +28,7 @@ describe('#defaultConfig', function() {
 		},
 		'insight-api': {
 		  routePrefix: 'api',
-		  coinTicker: 'https://api.coinmarketcap.com/v1/ticker/aipgcoin/?convert=USD',
+		  coinTicker: 'https://api.coinmarketcap.com/v1/ticker/aipg/?convert=USD',
 		  coinShort: 'aipg',
       db: {
         host: '127.0.0.1',
@@ -99,7 +99,7 @@ describe('#defaultConfig', function() {
 		},
 		'insight-api': {
 		  routePrefix: 'api',
-		  coinTicker: 'https://api.coinmarketcap.com/v1/ticker/aipgcoin/?convert=USD',
+		  coinTicker: 'https://api.coinmarketcap.com/v1/ticker/aipg/?convert=USD',
 		  coinShort: 'aipg',
       db: {
         host: '127.0.0.1',
