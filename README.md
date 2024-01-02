@@ -1,7 +1,7 @@
 aipgcore Node
 ============
 
-A aipgcoin full node for building applications and services with Node.js. A node is extensible and can be configured to run additional services. At the minimum a node has an interface to [aipgcoin with additional indexing](https://github.com/underdarkskies/aipgcoin/tree/0.15.0-aipgcore) for more advanced address queries. Additional services can be enabled to make a node more useful such as exposing new APIs, running a block explorer and wallet service.
+An aipg full node for building applications and services with Node.js. A node is extensible and can be configured to run additional services. At the minimum a node has an interface to [aipg with additional indexing](https://github.com/underdarkskies/aipg/tree/0.15.0-aipgcore) for more advanced address queries. Additional services can be enabled to make a node more useful such as exposing new APIs, running a block explorer and wallet service.
 
 ## Install
 
@@ -10,7 +10,7 @@ npm install -g aipgcore-node
 aipgcore-node start
 ```
 
-Note: For your convenience, we distribute aipgd binaries for x86_64 Linux and x86_64 Mac OS X. Upon npm install, the binaries for your platform will be downloaded. For more detailed installation instructions, or if you want to compile the project yourself, then please see the aipgcore branch of [aipgcoin with additional indexing](https://github.com/underdarkskies/aipgcoin/tree/0.15.0-aipgcore).
+Note: For your convenience, we distribute aipgd binaries for x86_64 Linux and x86_64 Mac OS X. Upon npm install, the binaries for your platform will be downloaded. For more detailed installation instructions, or if you want to compile the project yourself, then please see the aipgcore branch of [aipg with additional indexing](https://github.com/underdarkskies/aipg/tree/0.15.0-aipgcore).
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ Note: For your convenience, we distribute aipgd binaries for x86_64 Linux and x8
 aipgcore includes a Command Line Interface (CLI) for managing, configuring and interfacing with your aipgcore Node.
 
 ```bash
-aipgcore-node create -d <aipgcoin-data-dir> mynode
+aipgcore-node create -d <aipg-data-dir> mynode
 cd mynode
 aipgcore-node install <service>
 aipgcore-node install https://github.com/yourname/helloworld
@@ -45,7 +45,7 @@ There are several add-on services available to extend the functionality of aipgc
 
 - [Upgrade Notes](docs/upgrade.md)
 - [Services](docs/services.md)
-  - [aipgd](docs/services/aipgd.md) - Interface to aipgcoin Core
+  - [aipgd](docs/services/aipgd.md) - Interface to aipg Core
   - [Web](docs/services/web.md) - Creates an express application over which services can expose their web/API content
 - [Development Environment](docs/development.md) - Guide for setting up a development environment
 - [Node](docs/node.md) - Details on the node constructor
