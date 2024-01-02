@@ -4,7 +4,7 @@ var path = require('path');
 var async = require('async');
 var spawn = require('child_process').spawn;
 
-var aipgcoinRPC = require('aipgd-rpc');
+var aipgRPC = require('aipgd-rpc');
 var rimraf = require('rimraf');
 var aipgcore = require('aipgcore-lib');
 var chai = require('chai');
@@ -14,9 +14,9 @@ var index = require('..');
 var log = index.log;
 log.debug = function() {};
 var aipgcoreNode = index.Node;
-var aipgcoinService = index.services.aipgcoin;
+var aipgService = index.services.aipg;
 
-describe('aipgcoin Cluster', function() {
+describe('aipg Cluster', function() {
   var node;
   var daemons = [];
   var execPath = path.resolve(__dirname, '../bin/aipgd');
@@ -24,7 +24,7 @@ describe('aipgcoin Cluster', function() {
     {
       datadir: path.resolve(__dirname, './data/node1'),
       conf: path.resolve(__dirname, './data/node1/aipg.conf'),
-      rpcuser: 'aipgcoin',
+      rpcuser: 'aipg',
       rpcpassword: 'local321',
       rpcport: 30521,
       zmqpubrawtx: 'tcp://127.0.0.1:30611',
@@ -33,7 +33,7 @@ describe('aipgcoin Cluster', function() {
     {
       datadir: path.resolve(__dirname, './data/node2'),
       conf: path.resolve(__dirname, './data/node2/aipg.conf'),
-      rpcuser: 'aipgcoin',
+      rpcuser: 'aipg',
       rpcpassword: 'local321',
       rpcport: 30522,
       zmqpubrawtx: 'tcp://127.0.0.1:30622',
@@ -42,7 +42,7 @@ describe('aipgcoin Cluster', function() {
     {
       datadir: path.resolve(__dirname, './data/node3'),
       conf: path.resolve(__dirname, './data/node3/aipg.conf'),
-      rpcuser: 'aipgcoin',
+      rpcuser: 'aipg',
       rpcpassword: 'local321',
       rpcport: 30523,
       zmqpubrawtx: 'tcp://127.0.0.1:30633',
@@ -67,7 +67,7 @@ describe('aipgcoin Cluster', function() {
 
         var process = spawn(execPath, opts, {stdio: 'inherit'});
 
-        var client = new aipgcoinRPC({
+        var client = new aipgRPC({
           protocol: 'http',
           host: '127.0.0.1',
           port: nodeConf.rpcport,
@@ -103,27 +103,27 @@ describe('aipgcoin Cluster', function() {
       services: [
         {
           name: 'aipgd',
-          module: aipgcoinService,
+          module: aipgService,
           config: {
             connect: [
               {
                 rpchost: '127.0.0.1',
                 rpcport: 30521,
-                rpcuser: 'aipgcoin',
+                rpcuser: 'aipg',
                 rpcpassword: 'local321',
                 zmqpubrawtx: 'tcp://127.0.0.1:30611'
               },
               {
                 rpchost: '127.0.0.1',
                 rpcport: 30522,
-                rpcuser: 'aipgcoin',
+                rpcuser: 'aipg',
                 rpcpassword: 'local321',
                 zmqpubrawtx: 'tcp://127.0.0.1:30622'
               },
               {
                 rpchost: '127.0.0.1',
                 rpcport: 30523,
-                rpcuser: 'aipgcoin',
+                rpcuser: 'aipg',
                 rpcpassword: 'local321',
                 zmqpubrawtx: 'tcp://127.0.0.1:30633'
               }
