@@ -15,11 +15,11 @@ var node;
 
 var should = chai.should();
 
-var aipgcoinRPC = require('aipgd-rpc');
+var aipgRPC = require('aipgd-rpc');
 var index = require('..');
 var Transaction = aipgcore.Transaction;
 var aipgcoreNode = index.Node;
-var aipgcoinService = index.services.aipgcoin;
+var aipgService = index.services.aipg;
 var testWIF = 'cSdkPxkAjA4HDr5VHgsebAPDEh9Gyub4HK8UJr2DFGGqKKy4K5sG';
 var testKey;
 var client;
@@ -49,7 +49,7 @@ describe('Node Functionality', function() {
         services: [
           {
             name: 'aipgd',
-            module: aipgcoinService,
+            module: aipgService,
             config: {
               spawn: {
                 datadir: datadir,
@@ -74,11 +74,11 @@ describe('Node Functionality', function() {
           return done(err);
         }
 
-        client = new aipgcoinRPC({
+        client = new aipgRPC({
           protocol: 'http',
           host: '127.0.0.1',
           port: 30331,
-          user: 'aipgcoin',
+          user: 'aipg',
           pass: 'local321',
           rejectUnauthorized: false
         });
