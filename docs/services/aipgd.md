@@ -1,17 +1,17 @@
-# aipgcoin Service
+# aipg Service
 
-The aipgcoin Service is a Node.js interface to [aipgcoin](https://github.com/AIPowerGrid/AI-Power-Grid-Core) for querying information about the aipgcoin block chain. It will manage starting and stopping `aipgd` or connect to several running `aipgd` processes. It uses a branch of a [branch of aipgcoin](https://github.com/underdarkskies/aipgcoin/tree/0.15.0-aipgcore/) with additional indexes for querying information about addresses and blocks. Results are cached for performance and there are several additional API methods added for common queries.
+The aipg Service is a Node.js interface to [aipg](https://github.com/AIPowerGrid/AI-Power-Grid-Core) for querying information about the aipg block chain. It will manage starting and stopping `aipgd` or connect to several running `aipgd` processes. It uses a branch of a [branch of aipg](https://github.com/underdarkskies/aipg/tree/0.15.0-aipgcore/) with additional indexes for querying information about addresses and blocks. Results are cached for performance and there are several additional API methods added for common queries.
 
 ## Configuration
 
-The default configuration will include a "spawn" configuration in "aipgd". This defines the location of the block chain database and the location of the `aipgd` daemon executable. The below configuration points to a local clone of `aipgcoin`, and will start `aipgd` automatically with your Node.js application.
+The default configuration will include a "spawn" configuration in "aipgd". This defines the location of the block chain database and the location of the `aipgd` daemon executable. The below configuration points to a local clone of `aipg`, and will start `aipgd` automatically with your Node.js application.
 
 ```json
   "servicesConfig": {
     "aipgd": {
       "spawn": {
         "datadir": "/home/aipgcore/.aipg",
-        "exec": "/home/aipgcore/aipgcoin/src/aipgd"
+        "exec": "/home/aipgcore/aipg/src/aipgd"
       }
     }
   }
@@ -26,21 +26,21 @@ It's also possible to connect to separately managed `aipgd` processes with round
         {
           "rpchost": "127.0.0.1",
           "rpcport": 30521,
-          "rpcuser": "aipgcoin",
+          "rpcuser": "aipg",
           "rpcpassword": "local321",
           "zmqpubrawtx": "tcp://127.0.0.1:30611"
         },
         {
           "rpchost": "127.0.0.1",
           "rpcport": 30522,
-          "rpcuser": "aipgcoin",
+          "rpcuser": "aipg",
           "rpcpassword": "local321",
           "zmqpubrawtx": "tcp://127.0.0.1:30622"
         },
         {
           "rpchost": "127.0.0.1",
           "rpcport": 30523,
-          "rpcuser": "aipgcoin",
+          "rpcuser": "aipg",
           "rpcpassword": "local321",
           "zmqpubrawtx": "tcp://127.0.0.1:30633"
         }
@@ -217,7 +217,7 @@ node.services.aipgd.getAddressBalance(address, options, function(err, balance) {
 
 This method will give history of an address limited by a range of block heights by using the "start" and "end" arguments. The "start" value is the more recent, and greater, block height. The "end" value is the older, and lesser, block height. This feature is most useful for synchronization as previous history can be omitted. Furthermore for large ranges of block heights, results can be paginated by using the "from" and "to" arguments.
 
-If "queryMempool" is set as true (it is true by default), it will show unconfirmed transactions from the aipgcoin mempool. However, if you specify "start" and "end", "queryMempool" is ignored and is always false.
+If "queryMempool" is set as true (it is true by default), it will show unconfirmed transactions from the aipg mempool. However, if you specify "start" and "end", "queryMempool" is ignored and is always false.
 
 If "queryMempoolOnly" is set as true (it is false by default), it will show *only* unconfirmed transactions from mempool.
 
@@ -290,7 +290,7 @@ The `summary` will have the format (values are in satoshis):
 
 
 ## Events
-The aipgcoin Service exposes two events via the Bus, and there are a few events that can be directly registered:
+The aipg Service exposes two events via the Bus, and there are a few events that can be directly registered:
 
 ```js
 node.services.aipgd.on('tip', function(blockHash) {
