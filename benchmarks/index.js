@@ -1,14 +1,14 @@
 aipgcore'use strict';
 
 var benchmark = require('benchmark');
-var aipgcoin = require('aipgcoin');
+var aipg = require('aipg');
 var async = require('async');
 var maxTime = 20;
 
-console.log('aipgcoin Service native interface vs. aipgcoin JSON RPC interface');
+console.log('aipg Service native interface vs. aipg JSON RPC interface');
 console.log('----------------------------------------------------------------------');
 
-// To run the benchmarks a fully synced aipgcoin directory is needed. The RPC comands
+// To run the benchmarks a fully synced aipg directory is needed. The RPC comands
 // can be modified to match the settings in aipg.conf.
 
 var fixtureData = {
@@ -26,7 +26,7 @@ var fixtureData = {
   ]
 };
 
-var aipgd = require('../').services.aipgcoin({
+var aipgd = require('../').services.aipg({
   node: {
     datadir: process.env.HOME + '/.aipg',
     network: {
@@ -43,14 +43,14 @@ aipgd.start(function(err) {
   if (err) {
     throw err;
   }
-  console.log('aipgcoin started');
+  console.log('aipg started');
 });
 
 aipgd.on('ready', function() {
 
-  console.log('aipgcoin ready');
+  console.log('aipg ready');
 
-  var client = new aipgcoin.Client({
+  var client = new aipg.Client({
     host: 'localhost',
     port: 18332,
     user: 'aipg',

@@ -37,7 +37,7 @@ If, instead, you would like to run a custom node, you can include services by in
 var aipgcore = require('aipgcore-node');
 
 //Services
-var aipgcoin = aipgcore.services.aipgcoin;
+var aipg = aipgcore.services.aipg;
 var Web = aipgcore.services.Web;
 
 var myNode = new aipgcore.Node({
@@ -45,7 +45,7 @@ var myNode = new aipgcore.Node({
   services: [
     {
       name: 'aipgd',
-      module: aipgcoin,
+      module: aipg,
       config: {
         spawn: {
           datadir: '/home/<username>/.aipg',

@@ -1,6 +1,6 @@
 {
   "name": "aipgcore-node",
-  "description": "Full node with extended capabilities using aipgcore and aipgcoin",
+  "description": "Full node with extended capabilities using aipgcore and aipg",
   "author": "Under",
   "version": "1.0.3",
   "main": "./index.js",
@@ -15,7 +15,7 @@
   },
   "scripts": {
     "preinstall": "./scripts/download",
-    "verify": "./scripts/download --skip-aipgcoin-download --verify-aipgcoin-download",
+    "verify": "./scripts/download --skip-aipg-download --verify-aipg-download",
     "test": "mocha -R spec --recursive",
     "regtest": "./scripts/regtest",
     "jshint": "jshint --reporter=node_modules/jshint-stylish ./lib",
@@ -23,7 +23,7 @@
     "coveralls": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- --recursive -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "tags": [
-    "aipgcoin",
+    "aipg",
     "aipgd"
   ],
   "dependencies": {

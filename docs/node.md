@@ -15,7 +15,7 @@ A node represents a collection of services that are loaded together. For more in
 ```js
 
 var index = require('aipgcore-node');
-var aipgcoin = index.services.aipgcoin;
+var aipg = index.services.aipg;
 var Node = index.Node;
 
 var configuration = {
@@ -24,7 +24,7 @@ var configuration = {
   services: [
     {
       name: 'aipgd',
-      module: aipgcoin,
+      module: aipg,
       config: {}
     }
   ]
@@ -37,7 +37,7 @@ node.start(function() {
 });
 
 node.on('ready', function() {
-  console.log('aipgcoin Node Ready');
+  console.log('aipg Node Ready');
 });
 
 node.on('error', function(err) {

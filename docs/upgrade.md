@@ -18,7 +18,7 @@ To start reindexing add `reindex=1` during the **first startup only**.
 ### Configuration Options
 
 - The `aipg.conf` file in will need to be updated to include additional indexes *(see below)*.
-- The `datadir` option is now a part of `aipgd` spawn configuration, and there is a new option to connect to multiple aipgd processes (Please see [aipgcoin Service Docs](services/aipgd.md) for more details). The services `db` and `address` are now a part of the `aipgd` service. Here is how to update `aipgcore-node.json` configuration options:
+- The `datadir` option is now a part of `aipgd` spawn configuration, and there is a new option to connect to multiple aipgd processes (Please see [aipg Service Docs](services/aipgd.md) for more details). The services `db` and `address` are now a part of the `aipgd` service. Here is how to update `aipgcore-node.json` configuration options:
 
 **Before**:
 ```json
@@ -73,5 +73,5 @@ rpcpassword=<password>
 **Important**: Once changes have been made you'll also need to add the `reindex=1` option **only for the first startup** to regenerate the indexes. Once this is complete you should be able to remove the `aipgcore-node.db` directory with the old indexes.
 
 ### API and Service Changes
-- Many API methods that were a part of the `db` and `address` services are now a part of the `aipgd` service. Please see [aipgcoin Service Docs](services/aipgd.md) for more details.
+- Many API methods that were a part of the `db` and `address` services are now a part of the `aipgd` service. Please see [aipg Service Docs](services/aipgd.md) for more details.
 - The `db` and `address` services are deprecated, most of the functionality still exists. Any services that were extending indexes with the `db` service, will need to manage chain state itself, or build the indexes within `aipgd`.

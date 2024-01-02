@@ -17,7 +17,7 @@ var aipgd;
 var should = chai.should();
 var assert = chai.assert;
 var sinon = require('sinon');
-var aipgcoinRPC = require('aipgd-rpc');
+var aipgRPC = require('aipgd-rpc');
 var transactionData = [];
 var blockHashes = [];
 var utxos;
@@ -43,7 +43,7 @@ describe('aipgd Functionality', function() {
         throw err;
       }
 
-      aipgd = require('../').services.aipgcoin({
+      aipgd = require('../').services.aipg({
         spawn: {
           datadir: datadir,
           exec: path.resolve(__dirname, '../bin/aipgd')
@@ -60,16 +60,16 @@ describe('aipgd Functionality', function() {
         log.error('error="%s"', err.message);
       });
 
-      log.info('Waiting for aipgcoin Core to initialize...');
+      log.info('Waiting for aipg Core to initialize...');
 
       aipgd.start(function() {
         log.info('aipgd started');
 
-        client = new aipgcoinRPC({
+        client = new aipgRPC({
           protocol: 'http',
           host: '127.0.0.1',
           port: 30331,
-          user: 'aipgcoin',
+          user: 'aipg',
           pass: 'local321',
           rejectUnauthorized: false
         });

@@ -19,14 +19,14 @@ var errors = index.errors;
 
 var Transaction = aipgcore.Transaction;
 var readFileSync = sinon.stub().returns(fs.readFileSync(path.resolve(__dirname, '../data/aipg.conf')));
-var aipgcoinService = proxyquire('../../lib/services/aipgd', {
+var aipgService = proxyquire('../../lib/services/aipgd', {
   fs: {
     readFileSync: readFileSync
   }
 });
-var defaultaipgcoinConf = fs.readFileSync(path.resolve(__dirname, '../data/default.aipg.conf'), 'utf8');
+var defaultaipgConf = fs.readFileSync(path.resolve(__dirname, '../data/default.aipg.conf'), 'utf8');
 
-describe('aipgcoin Service', function() {
+describe('aipg Service', function() {
   var txhex = '01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0104ffffffff0100f2052a0100000043410496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858eeac00000000';
 
   var baseConfig = {
@@ -41,15 +41,15 @@ describe('aipgcoin Service', function() {
 
   describe('@constructor', function() {
     it('will create an instance', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       should.exist(aipgd);
     });
     it('will create an instance without `new`', function() {
-      var aipgd = aipgcoinService(baseConfig);
+      var aipgd = aipgService(baseConfig);
       should.exist(aipgd);
     });
     it('will init caches', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       should.exist(aipgd.utxosCache);
       should.exist(aipgd.txidsCache);
       should.exist(aipgd.balanceCache);
@@ -67,14 +67,14 @@ describe('aipgcoin Service', function() {
       should.exist(aipgd.lastTipTimeout);
     });
     it('will init clients', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.should.deep.equal([]);
       aipgd.nodesIndex.should.equal(0);
       aipgd.nodes.push({client: sinon.stub()});
       should.exist(aipgd.client);
     });
     it('will set subscriptions', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.subscriptions.should.deep.equal({
         address: {},
 		balance: {},
@@ -86,7 +86,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_initDefaults', function() {
     it('will set transaction concurrency', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._initDefaults({transactionConcurrency: 10});
       aipgd.transactionConcurrency.should.equal(10);
       aipgd._initDefaults({});
@@ -96,13 +96,13 @@ describe('aipgcoin Service', function() {
 
   describe('@dependencies', function() {
     it('will have no dependencies', function() {
-      aipgcoinService.dependencies.should.deep.equal([]);
+      aipgService.dependencies.should.deep.equal([]);
     });
   });
 
   describe('#getAPIMethods', function() {
     it('will return spec', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var methods = aipgd.getAPIMethods();
       should.exist(methods);
       methods.length.should.equal(28);
@@ -111,7 +111,7 @@ describe('aipgcoin Service', function() {
 
   describe('#getPublishEvents', function() {
     it('will return spec', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var events = aipgd.getPublishEvents();
       should.exist(events);
       events.length.should.equal(4);
@@ -133,7 +133,7 @@ describe('aipgcoin Service', function() {
       events[3].unsubscribe.should.be.a('function');
     });
     it('will call subscribe/unsubscribe with correct args', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.subscribe = sinon.stub();
       aipgd.unsubscribe = sinon.stub();
       var events = aipgd.getPublishEvents();
@@ -165,7 +165,7 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('will push to subscriptions', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter = {};
       aipgd.subscribe('hashblock', emitter);
       aipgd.subscriptions.hashblock[0].should.equal(emitter);
@@ -185,7 +185,7 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('will remove item from subscriptions', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter1 = {};
       var emitter2 = {};
       var emitter3 = {};
@@ -206,7 +206,7 @@ describe('aipgcoin Service', function() {
       aipgd.subscriptions.hashblock[3].should.equal(emitter5);
     });
     it('will not remove item an already unsubscribed item', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter1 = {};
       var emitter3 = {};
       aipgd.subscriptions.hashblock= [emitter1];
@@ -225,19 +225,19 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('will not an invalid address', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter = new EventEmitter();
       aipgd.subscribeAddress(emitter, ['invalidaddress']);
       should.not.exist(aipgd.subscriptions.address['invalidaddress']);
     });
     it('will add a valid address', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter = new EventEmitter();
       aipgd.subscribeAddress(emitter, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
       should.exist(aipgd.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
     });
     it('will handle multiple address subscribers', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
       aipgd.subscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
@@ -246,7 +246,7 @@ describe('aipgcoin Service', function() {
       aipgd.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(2);
     });
     it('will not add the same emitter twice', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter1 = new EventEmitter();
       aipgd.subscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
       aipgd.subscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
@@ -264,7 +264,7 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('it will remove a subscription', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
       aipgd.subscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
@@ -275,7 +275,7 @@ describe('aipgcoin Service', function() {
       aipgd.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
     });
     it('will unsubscribe subscriptions for an emitter', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
       aipgd.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
@@ -283,7 +283,7 @@ describe('aipgcoin Service', function() {
       aipgd.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
     });
     it('will NOT unsubscribe subscription with missing address', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
       aipgd.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
@@ -291,7 +291,7 @@ describe('aipgcoin Service', function() {
       aipgd.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(2);
     });
     it('will NOT unsubscribe subscription with missing emitter', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
       aipgd.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter2];
@@ -300,7 +300,7 @@ describe('aipgcoin Service', function() {
       aipgd.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'][0].should.equal(emitter2);
     });
     it('will remove empty addresses', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
       aipgd.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
@@ -309,7 +309,7 @@ describe('aipgcoin Service', function() {
       should.not.exist(aipgd.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
     });
     it('will unsubscribe emitter for all addresses', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
       aipgd.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
@@ -331,7 +331,7 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('will unsubscribe emitter for all addresses', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
       aipgd.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
@@ -348,9 +348,9 @@ describe('aipgcoin Service', function() {
 
   describe('#_getDefaultConfig', function() {
     it('will generate config file from defaults', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var config = aipgd._getDefaultConfig();
-      config.should.equal(defaultaipgcoinConf);
+      config.should.equal(defaultaipgConf);
     });
   });
 
@@ -363,7 +363,7 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('will parse a aipg.conf file', function() {
-      var Testaipgcoin = proxyquire('../../lib/services/aipgd', {
+      var Testaipg = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFileSync: readFileSync,
           existsSync: sinon.stub().returns(true),
@@ -373,7 +373,7 @@ describe('aipgcoin Service', function() {
           sync: sinon.stub()
         }
       });
-      var aipgd = new Testaipgcoin(baseConfig);
+      var aipgd = new Testaipg(baseConfig);
       aipgd.options.spawn.datadir = '/tmp/.aipg';
       var node = {};
       aipgd._loadSpawnConfiguration(node);
@@ -386,7 +386,7 @@ describe('aipgcoin Service', function() {
         port: 20000,
         rpcport: 50001,
         rpcallowip: '127.0.0.1',
-        rpcuser: 'aipgcoin',
+        rpcuser: 'aipg',
         rpcpassword: 'local321',
         server: 1,
         spentindex: 1,
@@ -399,7 +399,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will expand relative datadir to absolute path', function() {
-      var Testaipgcoin = proxyquire('../../lib/services/aipgd', {
+      var Testaipg = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFileSync: readFileSync,
           existsSync: sinon.stub().returns(true),
@@ -419,14 +419,14 @@ describe('aipgcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var aipgd = new Testaipgcoin(config);
+      var aipgd = new Testaipg(config);
       aipgd.options.spawn.datadir = './data';
       var node = {};
       aipgd._loadSpawnConfiguration(node);
       aipgd.options.spawn.datadir.should.equal('/tmp/.aipgcore/data');
     });
     it('should throw an exception if txindex isn\'t enabled in the configuration', function() {
-      var Testaipgcoin = proxyquire('../../lib/services/aipgd', {
+      var Testaipg = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFileSync: sinon.stub().returns(fs.readFileSync(__dirname + '/../data/badaipg.conf')),
           existsSync: sinon.stub().returns(true),
@@ -435,16 +435,16 @@ describe('aipgcoin Service', function() {
           sync: sinon.stub()
         }
       });
-      var aipgd = new Testaipgcoin(baseConfig);
+      var aipgd = new Testaipg(baseConfig);
       (function() {
         aipgd._loadSpawnConfiguration({datadir: './test'});
       }).should.throw(aipgcore.errors.InvalidState);
     });
     it('should NOT set https options if node https options are set', function() {
       var writeFileSync = function(path, config) {
-        config.should.equal(defaultaipgcoinConf);
+        config.should.equal(defaultaipgConf);
       };
-      var Testaipgcoin = proxyquire('../../lib/services/aipgd', {
+      var Testaipg = proxyquire('../../lib/services/aipgd', {
         fs: {
           writeFileSync: writeFileSync,
           readFileSync: readFileSync,
@@ -470,7 +470,7 @@ describe('aipgcoin Service', function() {
           exec: 'testexec'
         }
       };
-      var aipgd = new Testaipgcoin(config);
+      var aipgd = new Testaipg(config);
       aipgd.options.spawn.datadir = '/tmp/.aipg';
       var node = {};
       aipgd._loadSpawnConfiguration(node);
@@ -486,7 +486,7 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('should warn the user if reindex is set to 1 in the aipg.conf file', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var config = {
         txindex: 1,
         addressindex: 1,
@@ -502,7 +502,7 @@ describe('aipgcoin Service', function() {
       node._reindex.should.equal(true);
     });
     it('should warn if zmq port and hosts do not match', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var config = {
         txindex: 1,
         addressindex: 1,
@@ -521,7 +521,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_resetCaches', function() {
     it('will reset LRU caches', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var keys = [];
       for (var i = 0; i < 10; i++) {
         keys.push(crypto.randomBytes(32));
@@ -542,7 +542,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_tryAllClients', function() {
     it('will retry for each node client', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.tryAllInterval = 1;
       aipgd.nodes.push({
         client: {
@@ -572,7 +572,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will start using the current node index (round-robin)', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.tryAllInterval = 1;
       aipgd.nodes.push({
         client: {
@@ -603,7 +603,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will get error if all clients fail', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.tryAllInterval = 1;
       aipgd.nodes.push({
         client: {
@@ -633,7 +633,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_wrapRPCError', function() {
     it('will convert aipgd-rpc error object into JavaScript error', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var error = aipgd._wrapRPCError({message: 'Test error', code: -1});
       error.should.be.an.instanceof(errors.RPCError);
       error.code.should.equal(-1);
@@ -650,7 +650,7 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('will set height and genesis buffer', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var genesisBuffer = Buffer.from([]);
       aipgd.getRawBlock = sinon.stub().callsArgWith(1, null, genesisBuffer);
       aipgd.nodes.push({
@@ -686,7 +686,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('it will handle error from getBestBlockHash', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, {code: -1, message: 'error'});
       aipgd.nodes.push({
         client: {
@@ -699,7 +699,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('it will handle error from getBlock', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {});
       var getBlock = sinon.stub().callsArgWith(1, {code: -1, message: 'error'});
       aipgd.nodes.push({
@@ -714,7 +714,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('it will handle error from getBlockHash', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {});
       var getBlock = sinon.stub().callsArgWith(1, null, {
         result: {
@@ -735,7 +735,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('it will handle error from getRawBlock', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {});
       var getBlock = sinon.stub().callsArgWith(1, null, {
         result: {
@@ -773,7 +773,7 @@ describe('aipgcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var aipgd = new aipgcoinService(config);
+      var aipgd = new aipgService(config);
       aipgd._getDefaultConf().rpcport.should.equal(8766);
     });
     it('will get default rpc port for testnet', function() {
@@ -786,7 +786,7 @@ describe('aipgcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var aipgd = new aipgcoinService(config);
+      var aipgd = new aipgService(config);
       aipgd._getDefaultConf().rpcport.should.equal(18766);
     });
     it('will get default rpc port for regtest', function() {
@@ -800,7 +800,7 @@ describe('aipgcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var aipgd = new aipgcoinService(config);
+      var aipgd = new aipgService(config);
       aipgd._getDefaultConf().rpcport.should.equal(18766);
     });
   });
@@ -820,7 +820,7 @@ describe('aipgcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var aipgd = new aipgcoinService(config);
+      var aipgd = new aipgService(config);
       should.equal(aipgd._getNetworkConfigPath(), undefined);
     });
     it('will get default rpc port for testnet', function() {
@@ -833,7 +833,7 @@ describe('aipgcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var aipgd = new aipgcoinService(config);
+      var aipgd = new aipgService(config);
       aipgd._getNetworkConfigPath().should.equal('testnet3/aipg.conf');
     });
     it('will get default rpc port for regtest', function() {
@@ -847,7 +847,7 @@ describe('aipgcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var aipgd = new aipgcoinService(config);
+      var aipgd = new aipgService(config);
       aipgd._getNetworkConfigPath().should.equal('regtest/aipg.conf');
     });
   });
@@ -858,18 +858,18 @@ describe('aipgcoin Service', function() {
       baseConfig.node.network = aipgcore.Networks.testnet;
     });
     it('return --testnet for testnet', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.node.network = aipgcore.Networks.testnet;
       aipgd._getNetworkOption().should.equal('--testnet');
     });
     it('return --regtest for testnet', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.node.network = aipgcore.Networks.testnet;
       aipgcore.Networks.enableRegtest();
       aipgd._getNetworkOption().should.equal('--regtest');
     });
     it('return undefined for livenet', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.node.network = aipgcore.Networks.livenet;
       aipgcore.Networks.enableRegtest();
       should.equal(aipgd._getNetworkOption(), undefined);
@@ -878,7 +878,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_zmqBlockHandler', function() {
     it('will emit block', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var node = {};
       var message = Buffer.from('00000000002e08fc7ae9a9aa5380e95e2adcdc5752a4a66a7d3a22466bd4e6aa', 'hex');
       aipgd._rapidProtectedUpdateTip = sinon.stub();
@@ -889,7 +889,7 @@ describe('aipgcoin Service', function() {
       aipgd._zmqBlockHandler(node, message);
     });
     it('will not emit same block twice', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var node = {};
       var message = Buffer.from('00000000002e08fc7ae9a9aa5380e95e2adcdc5752a4a66a7d3a22466bd4e6aa', 'hex');
       aipgd._rapidProtectedUpdateTip = sinon.stub();
@@ -901,7 +901,7 @@ describe('aipgcoin Service', function() {
       aipgd._zmqBlockHandler(node, message);
     });
     it('will call function to update tip', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var node = {};
       var message = Buffer.from('00000000002e08fc7ae9a9aa5380e95e2adcdc5752a4a66a7d3a22466bd4e6aa', 'hex');
       aipgd._rapidProtectedUpdateTip = sinon.stub();
@@ -911,7 +911,7 @@ describe('aipgcoin Service', function() {
       aipgd._rapidProtectedUpdateTip.args[0][1].should.equal(message);
     });
     it('will emit to subscribers', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var node = {};
       var message = Buffer.from('00000000002e08fc7ae9a9aa5380e95e2adcdc5752a4a66a7d3a22466bd4e6aa', 'hex');
       aipgd._rapidProtectedUpdateTip = sinon.stub();
@@ -927,7 +927,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_rapidProtectedUpdateTip', function() {
     it('will limit tip updates with rapid calls', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var callCount = 0;
       aipgd._updateTip = function() {
         callCount++;
@@ -961,7 +961,7 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('log and emit rpc error from get block', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.syncPercentage = sinon.stub();
       aipgd.on('error', function(err) {
         err.code.should.equal(-1);
@@ -977,7 +977,7 @@ describe('aipgcoin Service', function() {
       aipgd._updateTip(node, message);
     });
     it('emit synced if percentage is 100', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.syncPercentage = sinon.stub().callsArgWith(0, null, 100);
       aipgd.on('synced', function() {
         done();
@@ -990,7 +990,7 @@ describe('aipgcoin Service', function() {
       aipgd._updateTip(node, message);
     });
     it('NOT emit synced if percentage is less than 100', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.syncPercentage = sinon.stub().callsArgWith(0, null, 99);
       aipgd.on('synced', function() {
         throw new Error('Synced called');
@@ -1005,7 +1005,7 @@ describe('aipgcoin Service', function() {
       done();
     });
     it('log and emit error from syncPercentage', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.syncPercentage = sinon.stub().callsArgWith(0, new Error('test'));
       aipgd.on('error', function(err) {
         log.error.callCount.should.equal(1);
@@ -1020,7 +1020,7 @@ describe('aipgcoin Service', function() {
       aipgd._updateTip(node, message);
     });
     it('reset caches and set height', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.syncPercentage = sinon.stub();
       aipgd._resetCaches = sinon.stub();
       aipgd.on('tip', function(height) {
@@ -1041,7 +1041,7 @@ describe('aipgcoin Service', function() {
       aipgd._updateTip(node, message);
     });
     it('will NOT update twice for the same hash', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.syncPercentage = sinon.stub();
       aipgd._resetCaches = sinon.stub();
       aipgd.on('tip', function() {
@@ -1069,7 +1069,7 @@ describe('aipgcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var aipgd = new aipgcoinService(config);
+      var aipgd = new aipgService(config);
       aipgd.syncPercentage = sinon.stub();
       aipgd._resetCaches = sinon.stub();
       aipgd.node.stopping = true;
@@ -1092,7 +1092,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_getAddressesFromTransaction', function() {
     it('will get results using aipgcore.Transaction', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var wif = 'L2Gkw3kKJ6N24QcDuH4XDqt9cTqsKTVNDGz1CRZhk9cq4auDUbJy';
       var privkey = aipgcore.PrivateKey.fromWIF(wif);
       var inputAddress = privkey.toAddress(aipgcore.Networks.testnet);
@@ -1113,7 +1113,7 @@ describe('aipgcoin Service', function() {
       addresses[1].should.equal(outputAddress.toString());
     });
     it('will handle non-standard script types', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var tx = aipgcore.Transaction();
       tx.addInput(aipgcore.Transaction.Input({
         prevTxId: '4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b',
@@ -1132,7 +1132,7 @@ describe('aipgcoin Service', function() {
       addresses.length.should.equal(0);
     });
     it('will handle unparsable script types or missing input script', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var tx = aipgcore.Transaction();
       tx.addOutput(aipgcore.Transaction.Output({
         script: Buffer.from('4c', 'hex'),
@@ -1142,7 +1142,7 @@ describe('aipgcoin Service', function() {
       addresses.length.should.equal(0);
     });
     it('will return unique values', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var tx = aipgcore.Transaction();
       var address = aipgcore.Address('2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br');
       tx.addOutput(aipgcore.Transaction.Output({
@@ -1160,7 +1160,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_notifyAddressTxidSubscribers', function() {
     it('will emit event if matching addresses', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var address = 'RJYZeWxr1Ly8YgcvJU1qD5MR9jUtk14HkN';
       aipgd._getAddressesFromTransaction = sinon.stub().returns([address]);
       var emitter = new EventEmitter();
@@ -1177,7 +1177,7 @@ describe('aipgcoin Service', function() {
       emitter.emit.callCount.should.equal(1);
     });
     it('will NOT emit event without matching addresses', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var address = 'RJYZeWxr1Ly8YgcvJU1qD5MR9jUtk14HkN';
       aipgd._getAddressesFromTransaction = sinon.stub().returns([address]);
       var emitter = new EventEmitter();
@@ -1191,7 +1191,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_zmqTransactionHandler', function() {
     it('will emit to subscribers', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var expectedBuffer = Buffer.from(txhex, 'hex');
       var emitter = new EventEmitter();
       aipgd.subscriptions.rawtransaction.push(emitter);
@@ -1204,7 +1204,7 @@ describe('aipgcoin Service', function() {
       aipgd._zmqTransactionHandler(node, expectedBuffer);
     });
     it('will NOT emit to subscribers more than once for the same tx', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var expectedBuffer = Buffer.from(txhex, 'hex');
       var emitter = new EventEmitter();
       aipgd.subscriptions.rawtransaction.push(emitter);
@@ -1216,7 +1216,7 @@ describe('aipgcoin Service', function() {
       aipgd._zmqTransactionHandler(node, expectedBuffer);
     });
     it('will emit "tx" event', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var expectedBuffer = Buffer.from(txhex, 'hex');
       aipgd.on('tx', function(buffer) {
         buffer.should.be.instanceof(Buffer);
@@ -1227,7 +1227,7 @@ describe('aipgcoin Service', function() {
       aipgd._zmqTransactionHandler(node, expectedBuffer);
     });
     it('will NOT emit "tx" event more than once for the same tx', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var expectedBuffer = Buffer.from(txhex, 'hex');
       aipgd.on('tx', function() {
         done();
@@ -1247,7 +1247,7 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('log errors, update tip and subscribe to zmq events', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._updateTip = sinon.stub();
       aipgd._subscribeZmqEvents = sinon.stub();
       var blockEvents = 0;
@@ -1301,7 +1301,7 @@ describe('aipgcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var aipgd = new aipgcoinService(config);
+      var aipgd = new aipgService(config);
       var getBestBlockHash = sinon.stub().callsArgWith(0, {code: -1, message: 'error'});
       var node = {
         _tipUpdateInterval: 1,
@@ -1320,7 +1320,7 @@ describe('aipgcoin Service', function() {
       }, 100);
     });
     it('will not set interval if synced is true', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._updateTip = sinon.stub();
       aipgd._subscribeZmqEvents = sinon.stub();
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {
@@ -1350,7 +1350,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_subscribeZmqEvents', function() {
     it('will call subscribe on zmq socket', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var node = {
         zmqSubSocket: {
           subscribe: sinon.stub(),
@@ -1363,7 +1363,7 @@ describe('aipgcoin Service', function() {
       node.zmqSubSocket.subscribe.args[1][0].should.equal('rawtx');
     });
     it('will call relevant handler for rawtx topics', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._zmqTransactionHandler = sinon.stub();
       var node = {
         zmqSubSocket: new EventEmitter()
@@ -1379,7 +1379,7 @@ describe('aipgcoin Service', function() {
       node.zmqSubSocket.emit('message', topic, message);
     });
     it('will call relevant handler for hashblock topics', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._zmqBlockHandler = sinon.stub();
       var node = {
         zmqSubSocket: new EventEmitter()
@@ -1395,7 +1395,7 @@ describe('aipgcoin Service', function() {
       node.zmqSubSocket.emit('message', topic, message);
     });
     it('will ignore unknown topic types', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._zmqBlockHandler = sinon.stub();
       aipgd._zmqTransactionHandler = sinon.stub();
       var node = {
@@ -1422,12 +1422,12 @@ describe('aipgcoin Service', function() {
       var socketFunc = function() {
         return socket;
       };
-      var aipgcoinService = proxyquire('../../lib/services/aipgd', {
+      var aipgService = proxyquire('../../lib/services/aipgd', {
         'zeromq': {
           socket: socketFunc
         }
       });
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var node = {};
       aipgd._initZmqSubSocket(node, 'url');
       node.zmqSubSocket.should.equal(socket);
@@ -1448,7 +1448,7 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('give error from client getblockchaininfo', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var node = {
         _reindex: true,
         _reindexWait: 1,
@@ -1463,7 +1463,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will wait until sync is 100 percent', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var percent = 0.89;
       var node = {
         _reindex: true,
@@ -1486,7 +1486,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will call callback if reindex is not enabled', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var node = {
         _reindex: false
       };
@@ -1506,7 +1506,7 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('will give rpc from client getbestblockhash', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, {code: -1, message: 'Test error'});
       var node = {
         client: {
@@ -1520,7 +1520,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give rpc from client getblock', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {
         result: '00000000000000001bb82a7f5973618cfd3185ba1ded04dd852a653f92a27c45'
       });
@@ -1539,7 +1539,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will log when error is RPC_IN_WARMUP', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, {code: -28, message: 'Verifying blocks...'});
       var node = {
         client: {
@@ -1553,7 +1553,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will set height and emit tip', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {
         result: '00000000000000001bb82a7f5973618cfd3185ba1ded04dd852a653f92a27c45'
       });
@@ -1595,16 +1595,16 @@ describe('aipgcoin Service', function() {
       var error = new Error('Test error');
       error.code = 'ENOENT';
       readFile.onCall(1).callsArgWith(2, error);
-      var TestaipgcoinService = proxyquire('../../lib/services/aipgd', {
+      var TestaipgService = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFile: readFile
         }
       });
-      var aipgd = new TestaipgcoinService(baseConfig);
+      var aipgd = new TestaipgService(baseConfig);
       aipgd.spawnStopTime = 1;
       aipgd._process = {};
       aipgd._process.kill = sinon.stub();
-      aipgd._stopSpawnedaipgcoin(function(err) {
+      aipgd._stopSpawnedaipg(function(err) {
         if (err) {
           return done(err);
         }
@@ -1619,18 +1619,18 @@ describe('aipgcoin Service', function() {
       var error = new Error('Test error');
       error.code = 'ENOENT';
       readFile.onCall(1).callsArgWith(2, error);
-      var TestaipgcoinService = proxyquire('../../lib/services/aipgd', {
+      var TestaipgService = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFile: readFile
         }
       });
-      var aipgd = new TestaipgcoinService(baseConfig);
+      var aipgd = new TestaipgService(baseConfig);
       aipgd.spawnStopTime = 1;
       aipgd._process = {};
       var error2 = new Error('Test error');
       error2.code = 'ESRCH';
       aipgd._process.kill = sinon.stub().throws(error2);
-      aipgd._stopSpawnedaipgcoin(function(err) {
+      aipgd._stopSpawnedaipg(function(err) {
         if (err) {
           return done(err);
         }
@@ -1642,16 +1642,16 @@ describe('aipgcoin Service', function() {
     it('it will attempt to kill process with NaN', function(done) {
       var readFile = sandbox.stub();
       readFile.onCall(0).callsArgWith(2, null, '     ');
-      var TestaipgcoinService = proxyquire('../../lib/services/aipgd', {
+      var TestaipgService = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFile: readFile
         }
       });
-      var aipgd = new TestaipgcoinService(baseConfig);
+      var aipgd = new TestaipgService(baseConfig);
       aipgd.spawnStopTime = 1;
       aipgd._process = {};
       aipgd._process.kill = sinon.stub();
-      aipgd._stopSpawnedaipgcoin(function(err) {
+      aipgd._stopSpawnedaipg(function(err) {
         if (err) {
           return done(err);
         }
@@ -1661,16 +1661,16 @@ describe('aipgcoin Service', function() {
     it('it will attempt to kill process without pid', function(done) {
       var readFile = sandbox.stub();
       readFile.onCall(0).callsArgWith(2, null, '');
-      var TestaipgcoinService = proxyquire('../../lib/services/aipgd', {
+      var TestaipgService = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFile: readFile
         }
       });
-      var aipgd = new TestaipgcoinService(baseConfig);
+      var aipgd = new TestaipgService(baseConfig);
       aipgd.spawnStopTime = 1;
       aipgd._process = {};
       aipgd._process.kill = sinon.stub();
-      aipgd._stopSpawnedaipgcoin(function(err) {
+      aipgd._stopSpawnedaipg(function(err) {
         if (err) {
           return done(err);
         }
@@ -1690,7 +1690,7 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('will give error from spawn config', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._loadSpawnConfiguration = sinon.stub();
       aipgd._loadSpawnConfiguration = sinon.stub().throws(new Error('test'));
       aipgd._spawnChildProcess(function(err) {
@@ -1699,10 +1699,10 @@ describe('aipgcoin Service', function() {
         done();
       });
     });
-    it('will give error from stopSpawnedaipgcoin', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+    it('will give error from stopSpawnedaipg', function() {
+      var aipgd = new aipgService(baseConfig);
       aipgd._loadSpawnConfiguration = sinon.stub();
-      aipgd._stopSpawnedaipgcoin = sinon.stub().callsArgWith(0, new Error('test'));
+      aipgd._stopSpawnedaipg = sinon.stub().callsArgWith(0, new Error('test'));
       aipgd._spawnChildProcess(function(err) {
         err.should.be.instanceOf(Error);
         err.message.should.equal('test');
@@ -1720,7 +1720,7 @@ describe('aipgcoin Service', function() {
       };
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestaipgcoinService = proxyquire('../../lib/services/aipgd', {
+      var TestaipgService = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1728,10 +1728,10 @@ describe('aipgcoin Service', function() {
           spawn: spawn
         }
       });
-      var aipgd = new TestaipgcoinService(config);
+      var aipgd = new TestaipgService(config);
       aipgd.spawn = {};
       aipgd._loadSpawnConfiguration = sinon.stub();
-      aipgd._stopSpawnedaipgcoin = sinon.stub().callsArgWith(0, null);
+      aipgd._stopSpawnedaipg = sinon.stub().callsArgWith(0, null);
       aipgd.node.stopping = true;
       aipgd._spawnChildProcess(function(err) {
         err.should.be.instanceOf(Error);
@@ -1741,7 +1741,7 @@ describe('aipgcoin Service', function() {
     it('will include network with spawn command and init zmq/rpc on node', function(done) {
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestaipgcoinService = proxyquire('../../lib/services/aipgd', {
+      var TestaipgService = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1749,7 +1749,7 @@ describe('aipgcoin Service', function() {
           spawn: spawn
         }
       });
-      var aipgd = new TestaipgcoinService(baseConfig);
+      var aipgd = new TestaipgService(baseConfig);
 
       aipgd._loadSpawnConfiguration = sinon.stub();
       aipgd.spawn = {};
@@ -1758,7 +1758,7 @@ describe('aipgcoin Service', function() {
       aipgd.spawn.datadir = 'testdir';
       aipgd.spawn.config = {};
       aipgd.spawn.config.rpcport = 20001;
-      aipgd.spawn.config.rpcuser = 'aipgcoin';
+      aipgd.spawn.config.rpcuser = 'aipg';
       aipgd.spawn.config.rpcpassword = 'password';
       aipgd.spawn.config.zmqpubrawtx = 'tcp://127.0.0.1:30001';
 
@@ -1792,7 +1792,7 @@ describe('aipgcoin Service', function() {
     it('will respawn aipgd spawned process', function(done) {
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestaipgcoinService = proxyquire('../../lib/services/aipgd', {
+      var TestaipgService = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1800,19 +1800,19 @@ describe('aipgcoin Service', function() {
           spawn: spawn
         }
       });
-      var aipgd = new TestaipgcoinService(baseConfig);
+      var aipgd = new TestaipgService(baseConfig);
       aipgd._loadSpawnConfiguration = sinon.stub();
       aipgd.spawn = {};
       aipgd.spawn.exec = 'aipgd';
-      aipgd.spawn.datadir = '/tmp/aipgcoin';
-      aipgd.spawn.configPath = '/tmp/aipgcoin/aipg.conf';
+      aipgd.spawn.datadir = '/tmp/aipg';
+      aipgd.spawn.configPath = '/tmp/aipg/aipg.conf';
       aipgd.spawn.config = {};
       aipgd.spawnRestartTime = 1;
       aipgd._loadTipFromNode = sinon.stub().callsArg(1);
       aipgd._initZmqSubSocket = sinon.stub();
       aipgd._checkReindex = sinon.stub().callsArg(1);
       aipgd._checkSyncedAndSubscribeZmqEvents = sinon.stub();
-      aipgd._stopSpawnedaipgcoin = sinon.stub().callsArg(0);
+      aipgd._stopSpawnedaipg = sinon.stub().callsArg(0);
       sinon.spy(aipgd, '_spawnChildProcess');
       aipgd._spawnChildProcess(function(err) {
         if (err) {
@@ -1830,7 +1830,7 @@ describe('aipgcoin Service', function() {
     it('will emit error during respawn', function(done) {
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestaipgcoinService = proxyquire('../../lib/services/aipgd', {
+      var TestaipgService = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1838,19 +1838,19 @@ describe('aipgcoin Service', function() {
           spawn: spawn
         }
       });
-      var aipgd = new TestaipgcoinService(baseConfig);
+      var aipgd = new TestaipgService(baseConfig);
       aipgd._loadSpawnConfiguration = sinon.stub();
       aipgd.spawn = {};
       aipgd.spawn.exec = 'aipgd';
-      aipgd.spawn.datadir = '/tmp/aipgcoin';
-      aipgd.spawn.configPath = '/tmp/aipgcoin/aipg.conf';
+      aipgd.spawn.datadir = '/tmp/aipg';
+      aipgd.spawn.configPath = '/tmp/aipg/aipg.conf';
       aipgd.spawn.config = {};
       aipgd.spawnRestartTime = 1;
       aipgd._loadTipFromNode = sinon.stub().callsArg(1);
       aipgd._initZmqSubSocket = sinon.stub();
       aipgd._checkReindex = sinon.stub().callsArg(1);
       aipgd._checkSyncedAndSubscribeZmqEvents = sinon.stub();
-      aipgd._stopSpawnedaipgcoin = sinon.stub().callsArg(0);
+      aipgd._stopSpawnedaipg = sinon.stub().callsArg(0);
       sinon.spy(aipgd, '_spawnChildProcess');
       aipgd._spawnChildProcess(function(err) {
         if (err) {
@@ -1868,7 +1868,7 @@ describe('aipgcoin Service', function() {
     it('will NOT respawn aipgd spawned process if shutting down', function(done) {
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestaipgcoinService = proxyquire('../../lib/services/aipgd', {
+      var TestaipgService = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1885,19 +1885,19 @@ describe('aipgcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var aipgd = new TestaipgcoinService(config);
+      var aipgd = new TestaipgService(config);
       aipgd._loadSpawnConfiguration = sinon.stub();
       aipgd.spawn = {};
       aipgd.spawn.exec = 'aipgd';
-      aipgd.spawn.datadir = '/tmp/aipgcoin';
-      aipgd.spawn.configPath = '/tmp/aipgcoin/aipg.conf';
+      aipgd.spawn.datadir = '/tmp/aipg';
+      aipgd.spawn.configPath = '/tmp/aipg/aipg.conf';
       aipgd.spawn.config = {};
       aipgd.spawnRestartTime = 1;
       aipgd._loadTipFromNode = sinon.stub().callsArg(1);
       aipgd._initZmqSubSocket = sinon.stub();
       aipgd._checkReindex = sinon.stub().callsArg(1);
       aipgd._checkSyncedAndSubscribeZmqEvents = sinon.stub();
-      aipgd._stopSpawnedaipgcoin = sinon.stub().callsArg(0);
+      aipgd._stopSpawnedaipg = sinon.stub().callsArg(0);
       sinon.spy(aipgd, '_spawnChildProcess');
       aipgd._spawnChildProcess(function(err) {
         if (err) {
@@ -1916,7 +1916,7 @@ describe('aipgcoin Service', function() {
     it('will give error after 60 retries', function(done) {
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestaipgcoinService = proxyquire('../../lib/services/aipgd', {
+      var TestaipgService = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1924,7 +1924,7 @@ describe('aipgcoin Service', function() {
           spawn: spawn
         }
       });
-      var aipgd = new TestaipgcoinService(baseConfig);
+      var aipgd = new TestaipgService(baseConfig);
       aipgd.startRetryInterval = 1;
       aipgd._loadSpawnConfiguration = sinon.stub();
       aipgd.spawn = {};
@@ -1933,7 +1933,7 @@ describe('aipgcoin Service', function() {
       aipgd.spawn.datadir = 'testdir';
       aipgd.spawn.config = {};
       aipgd.spawn.config.rpcport = 20001;
-      aipgd.spawn.config.rpcuser = 'aipgcoin';
+      aipgd.spawn.config.rpcuser = 'aipg';
       aipgd.spawn.config.rpcpassword = 'password';
       aipgd.spawn.config.zmqpubrawtx = 'tcp://127.0.0.1:30001';
       aipgd._loadTipFromNode = sinon.stub().callsArgWith(1, new Error('test'));
@@ -1946,7 +1946,7 @@ describe('aipgcoin Service', function() {
     it('will give error from check reindex', function(done) {
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestaipgcoinService = proxyquire('../../lib/services/aipgd', {
+      var TestaipgService = proxyquire('../../lib/services/aipgd', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1954,7 +1954,7 @@ describe('aipgcoin Service', function() {
           spawn: spawn
         }
       });
-      var aipgd = new TestaipgcoinService(baseConfig);
+      var aipgd = new TestaipgService(baseConfig);
 
       aipgd._loadSpawnConfiguration = sinon.stub();
       aipgd.spawn = {};
@@ -1963,7 +1963,7 @@ describe('aipgcoin Service', function() {
       aipgd.spawn.datadir = 'testdir';
       aipgd.spawn.config = {};
       aipgd.spawn.config.rpcport = 20001;
-      aipgd.spawn.config.rpcuser = 'aipgcoin';
+      aipgd.spawn.config.rpcuser = 'aipg';
       aipgd.spawn.config.rpcpassword = 'password';
       aipgd.spawn.config.zmqpubrawtx = 'tcp://127.0.0.1:30001';
 
@@ -1990,7 +1990,7 @@ describe('aipgcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var aipgd = new aipgcoinService(config);
+      var aipgd = new aipgService(config);
       aipgd.node.stopping = true;
       aipgd.startRetryInterval = 100;
       aipgd._loadTipFromNode = sinon.stub();
@@ -2002,7 +2002,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give error from loadTipFromNode after 60 retries', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._loadTipFromNode = sinon.stub().callsArgWith(1, new Error('test'));
       aipgd.startRetryInterval = 1;
       var config = {};
@@ -2013,7 +2013,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will init zmq/rpc on node', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._initZmqSubSocket = sinon.stub();
       aipgd._subscribeZmqEvents = sinon.stub();
       aipgd._loadTipFromNode = sinon.stub().callsArgWith(1, null);
@@ -2039,16 +2039,16 @@ describe('aipgcoin Service', function() {
       sandbox.restore();
     });
     it('will give error if "spawn" and "connect" are both not configured', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.options = {};
       aipgd.start(function(err) {
         err.should.be.instanceof(Error);
-        err.message.should.match(/aipgcoin configuration options/);
+        err.message.should.match(/aipg configuration options/);
       });
       done();
     });
     it('will give error from spawnChildProcess', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._spawnChildProcess = sinon.stub().callsArgWith(0, new Error('test'));
       aipgd.options = {
         spawn: {}
@@ -2060,7 +2060,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give error from connectProcess', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._connectProcess = sinon.stub().callsArgWith(1, new Error('test'));
       aipgd.options = {
         connect: [
@@ -2075,7 +2075,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will push node from spawnChildProcess', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var node = {};
       aipgd._initChain = sinon.stub().callsArg(0);
       aipgd._spawnChildProcess = sinon.stub().callsArgWith(0, null, node);
@@ -2089,7 +2089,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will push node from connectProcess', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._initChain = sinon.stub().callsArg(0);
       var nodes = [{}];
       aipgd._connectProcess = sinon.stub().callsArgWith(1, null, nodes);
@@ -2109,7 +2109,7 @@ describe('aipgcoin Service', function() {
 
   describe('#isSynced', function() {
     it('will give error from syncPercentage', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.syncPercentage = sinon.stub().callsArgWith(0, new Error('test'));
       aipgd.isSynced(function(err) {
         should.exist(err);
@@ -2118,7 +2118,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give "true" if percentage is 100.00', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.syncPercentage = sinon.stub().callsArgWith(0, null, 100.00);
       aipgd.isSynced(function(err, synced) {
         if (err) {
@@ -2129,7 +2129,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give "true" if percentage is 99.98', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.syncPercentage = sinon.stub().callsArgWith(0, null, 99.98);
       aipgd.isSynced(function(err, synced) {
         if (err) {
@@ -2140,7 +2140,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give "false" if percentage is 99.49', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.syncPercentage = sinon.stub().callsArgWith(0, null, 99.49);
       aipgd.isSynced(function(err, synced) {
         if (err) {
@@ -2151,7 +2151,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give "false" if percentage is 1', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.syncPercentage = sinon.stub().callsArgWith(0, null, 1);
       aipgd.isSynced(function(err, synced) {
         if (err) {
@@ -2165,7 +2165,7 @@ describe('aipgcoin Service', function() {
 
   describe('#syncPercentage', function() {
     it('will give rpc error', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockchainInfo = sinon.stub().callsArgWith(0, {message: 'error', code: -1});
       aipgd.nodes.push({
         client: {
@@ -2179,7 +2179,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will call client getInfo and give result', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockchainInfo = sinon.stub().callsArgWith(0, null, {
         result: {
           verificationprogress: '0.983821387'
@@ -2202,12 +2202,12 @@ describe('aipgcoin Service', function() {
 
   describe('#_normalizeAddressArg', function() {
     it('will turn single address into array', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var args = aipgd._normalizeAddressArg('address');
       args.should.deep.equal(['address']);
     });
     it('will keep an array as an array', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var args = aipgd._normalizeAddressArg(['address', 'address']);
       args.should.deep.equal(['address', 'address']);
     });
@@ -2215,7 +2215,7 @@ describe('aipgcoin Service', function() {
 
   describe('#getAddressBalance', function() {
     it('will give rpc error', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getAddressBalance: sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'})
@@ -2229,7 +2229,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give balance', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getAddressBalance = sinon.stub().callsArgWith(1, null, {
         result: {
           received: 100000,
@@ -2264,7 +2264,7 @@ describe('aipgcoin Service', function() {
 
   describe('#getAddressUnspentOutputs', function() {
     it('will give rpc error', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getAddressUtxos: sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'})
@@ -2281,7 +2281,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give results from client getaddressutxos', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var expectedUtxos = [
         {
           address: 'RM1FZ5Q4sKxsM1a97dLoUrjZYHZ7B6MKja',
@@ -2313,7 +2313,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will use cache', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var expectedUtxos = [
         {
           address: 'RM1FZ5Q4sKxsM1a97dLoUrjZYHZ7B6MKja',
@@ -2380,7 +2380,7 @@ describe('aipgcoin Service', function() {
           timestamp: 1461342954813
         }
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var confirmedUtxos = [
         {
           address: 'RM1FZ5Q4sKxsM1a97dLoUrjZYHZ7B6MKja',
@@ -2453,7 +2453,7 @@ describe('aipgcoin Service', function() {
           prevout: 2
         }
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var confirmedUtxos = [
         {
           address: 'RM1FZ5Q4sKxsM1a97dLoUrjZYHZ7B6MKja',
@@ -2532,7 +2532,7 @@ describe('aipgcoin Service', function() {
           timestamp: 1461342833133
         }
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var confirmedUtxos = [
         {
           address: 'RM1FZ5Q4sKxsM1a97dLoUrjZYHZ7B6MKja',
@@ -2639,7 +2639,7 @@ describe('aipgcoin Service', function() {
           timestamp: 1461342833133
         }
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var confirmedUtxos = [];
       aipgd.nodes.push({
         client: {
@@ -2680,7 +2680,7 @@ describe('aipgcoin Service', function() {
           prevout: 1
         }
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var confirmedUtxos = [
         {
           address: 'RM1FZ5Q4sKxsM1a97dLoUrjZYHZ7B6MKja',
@@ -2723,7 +2723,7 @@ describe('aipgcoin Service', function() {
           timestamp: 1461342707725
         }
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var confirmedUtxos = [
         {
           address: 'RM1FZ5Q4sKxsM1a97dLoUrjZYHZ7B6MKja',
@@ -2757,7 +2757,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('it will handle error from getAddressMempool', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, {code: -1, message: 'test'})
@@ -2773,7 +2773,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('should set query mempool if undefined', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getAddressMempool = sinon.stub().callsArgWith(1, {code: -1, message: 'test'});
       aipgd.nodes.push({
         client: {
@@ -2791,7 +2791,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_getBalanceFromMempool', function() {
     it('will sum satoshis', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var deltas = [
         {
           satoshis: -1000,
@@ -2810,7 +2810,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_getTxidsFromMempool', function() {
     it('will filter to txids', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var deltas = [
         {
           txid: 'txid0',
@@ -2829,7 +2829,7 @@ describe('aipgcoin Service', function() {
       txids[2].should.equal('txid2');
     });
     it('will not include duplicates', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var deltas = [
         {
           txid: 'txid0',
@@ -2850,7 +2850,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_getHeightRangeQuery', function() {
     it('will detect range query', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var options = {
         start: 20,
         end: 0
@@ -2859,7 +2859,7 @@ describe('aipgcoin Service', function() {
       rangeQuery.should.equal(true);
     });
     it('will get range properties', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var options = {
         start: 20,
         end: 0
@@ -2870,7 +2870,7 @@ describe('aipgcoin Service', function() {
       clone.start.should.equal(0);
     });
     it('will throw error with invalid range', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var options = {
         start: 0,
         end: 20
@@ -2883,7 +2883,7 @@ describe('aipgcoin Service', function() {
 
   describe('#getAddressTxids', function() {
     it('will give error from _getHeightRangeQuery', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._getHeightRangeQuery = sinon.stub().throws(new Error('test'));
       aipgd.getAddressTxids('address', {}, function(err) {
         err.should.be.instanceOf(Error);
@@ -2892,7 +2892,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give rpc error from mempool query', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'})
@@ -2906,7 +2906,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give rpc error from txids query', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getAddressTxids: sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'})
@@ -2934,7 +2934,7 @@ describe('aipgcoin Service', function() {
         'ed11a08e3102f9610bda44c80c46781d97936a4290691d87244b1b345b39a693',
         'ec94d845c603f292a93b7c829811ac624b76e52b351617ca5a758e9d61a11681'
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getAddressTxids: sinon.stub().callsArgWith(1, null, {
@@ -2959,7 +2959,7 @@ describe('aipgcoin Service', function() {
       var expectedTxids = [
         'e9dcf22807db77ac0276b03cc2d3a8b03c4837db8ac6650501ef45af1c807cce'
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getAddressTxids = sinon.stub().callsArgWith(1, null, {
         result: expectedTxids.reverse()
       });
@@ -2993,7 +2993,7 @@ describe('aipgcoin Service', function() {
       var expectedTxids = [
         'e9dcf22807db77ac0276b03cc2d3a8b03c4837db8ac6650501ef45af1c807cce'
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getAddressMempool = sinon.stub();
       var getAddressTxids = sinon.stub().callsArgWith(1, null, {
         result: expectedTxids.reverse()
@@ -3033,7 +3033,7 @@ describe('aipgcoin Service', function() {
       var expectedTxids = [
         'e9dcf22807db77ac0276b03cc2d3a8b03c4837db8ac6650501ef45af1c807cce'
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getAddressTxids = sinon.stub().callsArgWith(1, null, {
         result: expectedTxids.reverse()
       });
@@ -3104,7 +3104,7 @@ describe('aipgcoin Service', function() {
     it('should get 0 confirmation', function() {
       var tx = new Transaction(txhex);
       tx.height = -1;
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.height = 10;
       var confirmations = aipgd._getConfirmationsDetail(tx);
       confirmations.should.equal(0);
@@ -3112,13 +3112,13 @@ describe('aipgcoin Service', function() {
     it('should get 1 confirmation', function() {
       var tx = new Transaction(txhex);
       tx.height = 10;
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.height = 10;
       var confirmations = aipgd._getConfirmationsDetail(tx);
       confirmations.should.equal(1);
     });
     it('should get 2 confirmation', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var tx = new Transaction(txhex);
       aipgd.height = 11;
       tx.height = 10;
@@ -3126,7 +3126,7 @@ describe('aipgcoin Service', function() {
       confirmations.should.equal(2);
     });
     it('should get 0 confirmation with overflow', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var tx = new Transaction(txhex);
       aipgd.height = 3;
       tx.height = 10;
@@ -3135,7 +3135,7 @@ describe('aipgcoin Service', function() {
       confirmations.should.equal(0);
     });
     it('should get 1000 confirmation', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var tx = new Transaction(txhex);
       aipgd.height = 1000;
       tx.height = 1;
@@ -3146,14 +3146,14 @@ describe('aipgcoin Service', function() {
 
   describe('#_getAddressDetailsForInput', function() {
     it('will return if missing an address', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var result = {};
       aipgd._getAddressDetailsForInput({}, 0, result, []);
       should.not.exist(result.addresses);
       should.not.exist(result.satoshis);
     });
     it('will only add address if it matches', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var result = {};
       aipgd._getAddressDetailsForInput({
         address: 'address1'
@@ -3162,7 +3162,7 @@ describe('aipgcoin Service', function() {
       should.not.exist(result.satoshis);
     });
     it('will instantiate if outputIndexes not defined', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var result = {
         addresses: {}
       };
@@ -3174,7 +3174,7 @@ describe('aipgcoin Service', function() {
       result.addresses['address1'].outputIndexes.should.deep.equal([]);
     });
     it('will push to inputIndexes', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var result = {
         addresses: {
           'address1': {
@@ -3192,14 +3192,14 @@ describe('aipgcoin Service', function() {
 
   describe('#_getAddressDetailsForOutput', function() {
     it('will return if missing an address', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var result = {};
       aipgd._getAddressDetailsForOutput({}, 0, result, []);
       should.not.exist(result.addresses);
       should.not.exist(result.satoshis);
     });
     it('will only add address if it matches', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var result = {};
       aipgd._getAddressDetailsForOutput({
         address: 'address1'
@@ -3208,7 +3208,7 @@ describe('aipgcoin Service', function() {
       should.not.exist(result.satoshis);
     });
     it('will instantiate if outputIndexes not defined', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var result = {
         addresses: {}
       };
@@ -3220,7 +3220,7 @@ describe('aipgcoin Service', function() {
       result.addresses['address1'].outputIndexes.should.deep.equal([0]);
     });
     it('will push if outputIndexes defined', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var result = {
         addresses: {
           'address1': {
@@ -3270,7 +3270,7 @@ describe('aipgcoin Service', function() {
         ],
         locktime: 0
       };
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var addresses = ['mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW'];
       var details = aipgd._getAddressDetailsForTransaction(tx, addresses);
       should.exist(details.addresses['mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW']);
@@ -3289,7 +3289,7 @@ describe('aipgcoin Service', function() {
       var tx = {
         height: 20,
       };
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.getDetailedTransaction = sinon.stub().callsArgWith(1, null, tx);
       aipgd.height = 300;
       var addresses = {};
@@ -3310,7 +3310,7 @@ describe('aipgcoin Service', function() {
     });
     it('give error from getDetailedTransaction', function(done) {
       var txid = '46f24e0c274fc07708b781963576c4c5d5625d926dbb0a17fa865dcd9fe58ea0';
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.getDetailedTransaction = sinon.stub().callsArgWith(1, new Error('test'));
       aipgd._getAddressDetailedTransaction(txid, {}, function(err) {
         err.should.be.instanceof(Error);
@@ -3325,7 +3325,7 @@ describe('aipgcoin Service', function() {
         aipgcore.Address('RJYZeWxr1Ly8YgcvJU1qD5MR9jUtk14HkN'),
         aipgcore.Address('rAfsiNFiHsvDwEA1JsaE9Qmad5CgPVbELh'),
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var strings = aipgd._getAddressStrings(addresses);
       strings[0].should.equal('RJYZeWxr1Ly8YgcvJU1qD5MR9jUtk14HkN');
       strings[1].should.equal('rAfsiNFiHsvDwEA1JsaE9Qmad5CgPVbELh');
@@ -3335,7 +3335,7 @@ describe('aipgcoin Service', function() {
         'RJYZeWxr1Ly8YgcvJU1qD5MR9jUtk14HkN',
         'rAfsiNFiHsvDwEA1JsaE9Qmad5CgPVbELh',
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var strings = aipgd._getAddressStrings(addresses);
       strings[0].should.equal('RJYZeWxr1Ly8YgcvJU1qD5MR9jUtk14HkN');
       strings[1].should.equal('rAfsiNFiHsvDwEA1JsaE9Qmad5CgPVbELh');
@@ -3345,7 +3345,7 @@ describe('aipgcoin Service', function() {
         aipgcore.Address('RJYZeWxr1Ly8YgcvJU1qD5MR9jUtk14HkN'),
         'rAfsiNFiHsvDwEA1JsaE9Qmad5CgPVbELh',
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var strings = aipgd._getAddressStrings(addresses);
       strings[0].should.equal('RJYZeWxr1Ly8YgcvJU1qD5MR9jUtk14HkN');
       strings[1].should.equal('rAfsiNFiHsvDwEA1JsaE9Qmad5CgPVbELh');
@@ -3355,7 +3355,7 @@ describe('aipgcoin Service', function() {
         aipgcore.Address('RJYZeWxr1Ly8YgcvJU1qD5MR9jUtk14HkN'),
         0,
       ];
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       (function() {
         aipgd._getAddressStrings(addresses);
       }).should.throw(TypeError);
@@ -3364,32 +3364,32 @@ describe('aipgcoin Service', function() {
 
   describe('#_paginateTxids', function() {
     it('slice txids based on "from" and "to" (3 to 13)', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var txids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
       var paginated = aipgd._paginateTxids(txids, 3, 13);
       paginated.should.deep.equal([3, 4, 5, 6, 7, 8, 9, 10]);
     });
     it('slice txids based on "from" and "to" (0 to 3)', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var txids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
       var paginated = aipgd._paginateTxids(txids, 0, 3);
       paginated.should.deep.equal([0, 1, 2]);
     });
     it('slice txids based on "from" and "to" (0 to 1)', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var txids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
       var paginated = aipgd._paginateTxids(txids, 0, 1);
       paginated.should.deep.equal([0]);
     });
     it('will throw error if "from" is greater than "to"', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var txids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
       (function() {
         aipgd._paginateTxids(txids, 1, 0);
       }).should.throw('"from" (1) is expected to be less than "to"');
     });
     it('will handle string numbers', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var txids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
       var paginated = aipgd._paginateTxids(txids, '1', '3');
       paginated.should.deep.equal([1, 2]);
@@ -3399,7 +3399,7 @@ describe('aipgcoin Service', function() {
   describe('#getAddressHistory', function() {
     var address = '12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX';
     it('will give error with "from" and "to" range that exceeds max size', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.getAddressHistory(address, {from: 0, to: 51}, function(err) {
         should.exist(err);
         err.message.match(/^\"from/);
@@ -3407,7 +3407,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give error with "from" and "to" order is reversed', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.getAddressTxids = sinon.stub().callsArgWith(2, null, []);
       aipgd.getAddressHistory(address, {from: 51, to: 0}, function(err) {
         should.exist(err);
@@ -3416,7 +3416,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give error from _getAddressDetailedTransaction', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.getAddressTxids = sinon.stub().callsArgWith(2, null, ['txid']);
       aipgd._getAddressDetailedTransaction = sinon.stub().callsArgWith(2, new Error('test'));
       aipgd.getAddressHistory(address, {}, function(err) {
@@ -3430,7 +3430,7 @@ describe('aipgcoin Service', function() {
       for (var i = 0; i < 101; i++) {
         addresses.push(address);
       }
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.maxAddressesQuery = 100;
       aipgd.getAddressHistory(addresses, {}, function(err) {
         should.exist(err);
@@ -3439,7 +3439,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('give error from getAddressTxids', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.getAddressTxids = sinon.stub().callsArgWith(2, new Error('test'));
       aipgd.getAddressHistory('address', {}, function(err) {
         should.exist(err);
@@ -3449,7 +3449,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will paginate', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._getAddressDetailedTransaction = function(txid, options, callback) {
         callback(null, txid);
       };
@@ -3473,7 +3473,7 @@ describe('aipgcoin Service', function() {
     var memtxid1 = 'b1bfa8dbbde790cb46b9763ef3407c1a21c8264b67bfe224f462ec0e1f569e92';
     var memtxid2 = 'e9dcf22807db77ac0276b03cc2d3a8b03c4837db8ac6650501ef45af1c807cce';
     it('will handle error from getAddressTxids', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, null, {
@@ -3497,7 +3497,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will handle error from getAddressBalance', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, null, {
@@ -3521,7 +3521,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will handle error from client getAddressMempool', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'})
@@ -3539,7 +3539,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('should set all properties', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, null, {
@@ -3585,7 +3585,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give error with "from" and "to" range that exceeds max size', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, null, {
@@ -3619,7 +3619,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will get from cache with noTxList', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, null, {
@@ -3667,7 +3667,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will skip querying the mempool with queryMempool set to false', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getAddressMempool = sinon.stub();
       aipgd.nodes.push({
         client: {
@@ -3690,7 +3690,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give error from _paginateTxids', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getAddressMempool = sinon.stub();
       aipgd.nodes.push({
         client: {
@@ -3720,7 +3720,7 @@ describe('aipgcoin Service', function() {
     var blockhash = '00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b';
     var blockhex = '0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c0101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000';
     it('will give rcp error from client getblockhash', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getBlockHash: sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'})
@@ -3733,7 +3733,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give rcp error from client getblock', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getBlock: sinon.stub().callsArgWith(2, {code: -1, message: 'Test error'})
@@ -3746,7 +3746,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will try all nodes for getblock', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockWithError = sinon.stub().callsArgWith(2, {code: -1, message: 'Test error'});
       aipgd.tryAllInterval = 1;
       aipgd.nodes.push({
@@ -3776,7 +3776,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will get block from cache', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, null, {
         result: blockhex
       });
@@ -3802,7 +3802,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will get block by height', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, null, {
         result: blockhex
       });
@@ -3830,7 +3830,7 @@ describe('aipgcoin Service', function() {
   describe('#getBlock', function() {
     var blockhex = '0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c0101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000';
     it('will give an rpc error from client getblock', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, {code: -1, message: 'Test error'});
       var getBlockHash = sinon.stub().callsArgWith(1, null, {});
       aipgd.nodes.push({
@@ -3845,7 +3845,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give an rpc error from client getblockhash', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockHash = sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'});
       aipgd.nodes.push({
         client: {
@@ -3858,7 +3858,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will getblock as aipgcore object from height', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, null, {
         result: blockhex
       });
@@ -3880,7 +3880,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will getblock as aipgcore object', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, null, {
         result: blockhex
       });
@@ -3902,7 +3902,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will get block from cache', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, null, {
         result: blockhex
       });
@@ -3929,7 +3929,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will get block from cache with height (but not height)', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, null, {
         result: blockhex
       });
@@ -3960,7 +3960,7 @@ describe('aipgcoin Service', function() {
 
   describe('#getBlockHashesByTimestamp', function() {
     it('should give an rpc error', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockHashes = sinon.stub().callsArgWith(3, {message: 'error', code: -1});
       aipgd.nodes.push({
         client: {
@@ -3974,7 +3974,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('should get the correct block hashes', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var block1 = '00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b';
       var block2 = '000000000383752a55a0b2891ce018fd0fdc0b6352502772b034ec282b4a1bf6';
       var getBlockHashes = sinon.stub().callsArgWith(3, null, {
@@ -3996,7 +3996,7 @@ describe('aipgcoin Service', function() {
   describe('#getBlockHeader', function() {
     var blockhash = '00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b';
     it('will give error from getBlockHash', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockHash = sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'});
       aipgd.nodes.push({
         client: {
@@ -4008,7 +4008,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('it will give rpc error from client getblockheader', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockHeader = sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'});
       aipgd.nodes.push({
         client: {
@@ -4020,7 +4020,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('it will give rpc error from client getblockhash', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockHeader = sinon.stub();
       var getBlockHash = sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'});
       aipgd.nodes.push({
@@ -4034,7 +4034,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give result from client getblockheader (from height)', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var result = {
         hash: '0000000000000a817cd3a74aec2f2246b59eb2cbb1ad730213e6c4a1d68ec2f6',
         version: 536870912,
@@ -4083,7 +4083,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give result from client getblockheader (from hash)', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var result = {
         hash: '0000000000000a817cd3a74aec2f2246b59eb2cbb1ad730213e6c4a1d68ec2f6',
         version: 536870912,
@@ -4133,7 +4133,7 @@ describe('aipgcoin Service', function() {
 
   describe('#_maybeGetBlockHash', function() {
     it('will not get block hash with an address', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockHash = sinon.stub();
       aipgd.nodes.push({
         client: {
@@ -4150,7 +4150,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will not get block hash with non zero-nine numeric string', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockHash = sinon.stub();
       aipgd.nodes.push({
         client: {
@@ -4167,7 +4167,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will get the block hash if argument is a number', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockHash = sinon.stub().callsArgWith(1, null, {
         result: 'blockhash'
       });
@@ -4186,7 +4186,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will get the block hash if argument is a number (as string)', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockHash = sinon.stub().callsArgWith(1, null, {
         result: 'blockhash'
       });
@@ -4205,7 +4205,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will try multiple nodes if one fails', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockHash = sinon.stub().callsArgWith(1, null, {
         result: 'blockhash'
       });
@@ -4231,7 +4231,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give error from getBlockHash', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlockHash = sinon.stub().callsArgWith(1, {code: -1, message: 'test'});
       aipgd.tryAllInterval = 1;
       aipgd.nodes.push({
@@ -4257,7 +4257,7 @@ describe('aipgcoin Service', function() {
   describe('#getBlockOverview', function() {
     var blockhash = '00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b';
     it('will handle error from maybeGetBlockHash', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd._maybeGetBlockHash = sinon.stub().callsArgWith(1, new Error('test'));
       aipgd.getBlockOverview(blockhash, function(err) {
         err.should.be.instanceOf(Error);
@@ -4265,7 +4265,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give error from client.getBlock', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, {code: -1, message: 'test'});
       aipgd.nodes.push({
         client: {
@@ -4279,7 +4279,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will give expected result', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var blockResult = {
         hash: blockhash,
         version: 536870912,
@@ -4334,7 +4334,7 @@ describe('aipgcoin Service', function() {
 
   describe('#estimateFee', function() {
     it('will give rpc error', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var estimateFee = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
       aipgd.nodes.push({
         client: {
@@ -4348,7 +4348,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will call client estimateFee and give result', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var estimateFee = sinon.stub().callsArgWith(1, null, {
         result: -1
       });
@@ -4370,7 +4370,7 @@ describe('aipgcoin Service', function() {
   describe('#sendTransaction', function(done) {
     var tx = aipgcore.Transaction(txhex);
     it('will give rpc error', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var sendRawTransaction = sinon.stub().callsArgWith(2, {message: 'error', code: -1});
       aipgd.nodes.push({
         client: {
@@ -4383,7 +4383,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will send to client and get hash', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var sendRawTransaction = sinon.stub().callsArgWith(2, null, {
         result: tx.hash
       });
@@ -4400,7 +4400,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will send to client with absurd fees and get hash', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var sendRawTransaction = sinon.stub().callsArgWith(2, null, {
         result: tx.hash
       });
@@ -4417,7 +4417,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('missing callback will throw error', function() {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var sendRawTransaction = sinon.stub().callsArgWith(2, null, {
         result: tx.hash
       });
@@ -4435,7 +4435,7 @@ describe('aipgcoin Service', function() {
 
   describe('#getRawTransaction', function() {
     it('will give rpc error', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getRawTransaction = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
       aipgd.nodes.push({
         client: {
@@ -4449,7 +4449,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will try all nodes', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.tryAllInterval = 1;
       var getRawTransactionWithError = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
       var getRawTransaction = sinon.stub().callsArgWith(1, null, {
@@ -4480,7 +4480,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will get from cache', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getRawTransaction = sinon.stub().callsArgWith(1, null, {
         result: txhex
       });
@@ -4508,7 +4508,7 @@ describe('aipgcoin Service', function() {
 
   describe('#getTransaction', function() {
     it('will give rpc error', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getRawTransaction = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
       aipgd.nodes.push({
         client: {
@@ -4522,7 +4522,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will try all nodes', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.tryAllInterval = 1;
       var getRawTransactionWithError = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
       var getRawTransaction = sinon.stub().callsArgWith(1, null, {
@@ -4553,7 +4553,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will get from cache', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getRawTransaction = sinon.stub().callsArgWith(1, null, {
         result: txhex
       });
@@ -4623,7 +4623,7 @@ describe('aipgcoin Service', function() {
       ]
     };
     it('should give a transaction with height and timestamp', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.nodes.push({
         client: {
           getRawTransaction: sinon.stub().callsArgWith(2, {code: -1, message: 'Test error'})
@@ -4637,7 +4637,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('should give a transaction with all properties', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getRawTransaction = sinon.stub().callsArgWith(2, null, {
         result: rpcRawTransaction
       });
@@ -4694,7 +4694,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('should set coinbase to true', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var rawTransaction = JSON.parse((JSON.stringify(rpcRawTransaction)));
       delete rawTransaction.vin[0];
       rawTransaction.vin = [
@@ -4717,7 +4717,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will not include address if address length is zero', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var rawTransaction = JSON.parse((JSON.stringify(rpcRawTransaction)));
       rawTransaction.vout[0].scriptPubKey.addresses = [];
       aipgd.nodes.push({
@@ -4735,7 +4735,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will not include address if address length is greater than 1', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var rawTransaction = JSON.parse((JSON.stringify(rpcRawTransaction)));
       rawTransaction.vout[0].scriptPubKey.addresses = ['one', 'two'];
       aipgd.nodes.push({
@@ -4753,7 +4753,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will handle scriptPubKey.addresses not being set', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var rawTransaction = JSON.parse((JSON.stringify(rpcRawTransaction)));
       delete rawTransaction.vout[0].scriptPubKey['addresses'];
       aipgd.nodes.push({
@@ -4771,7 +4771,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will not include script if input missing scriptSig or coinbase', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var rawTransaction = JSON.parse((JSON.stringify(rpcRawTransaction)));
       delete rawTransaction.vin[0].scriptSig;
       delete rawTransaction.vin[0].coinbase;
@@ -4790,7 +4790,7 @@ describe('aipgcoin Service', function() {
       });
     });
 	it('will set height to -1 if missing height and get time from raw transaction', function(done) {
-		var aipgd = new aipgcoinService(baseConfig);
+		var aipgd = new aipgService(baseConfig);
 		sinon.spy(aipgd, '_tryAllClients');
 		var rawTransaction = JSON.parse((JSON.stringify(rpcRawTransaction)));
 		delete rawTransaction.height;
@@ -4817,7 +4817,7 @@ describe('aipgcoin Service', function() {
 		});
 	});
 	it('will set height to -1 if missing height and get time from mempoolentry', function(done) {
-		var aipgd = new aipgcoinService(baseConfig);
+		var aipgd = new aipgService(baseConfig);
 		sinon.spy(aipgd, '_tryAllClients');
 		var rawTransaction = JSON.parse((JSON.stringify(rpcRawTransaction)));
 		delete rawTransaction.time;
@@ -4850,7 +4850,7 @@ describe('aipgcoin Service', function() {
 
   describe('#getBestBlockHash', function() {
     it('will give rpc error', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, {message: 'error', code: -1});
       aipgd.nodes.push({
         client: {
@@ -4864,7 +4864,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will call client getInfo and give result', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {
         result: 'besthash'
       });
@@ -4886,7 +4886,7 @@ describe('aipgcoin Service', function() {
 
   describe('#getSpentInfo', function() {
     it('will give rpc error', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getSpentInfo = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
       aipgd.nodes.push({
         client: {
@@ -4900,7 +4900,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will empty object when not found', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getSpentInfo = sinon.stub().callsArgWith(1, {message: 'test', code: -5});
       aipgd.nodes.push({
         client: {
@@ -4914,7 +4914,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will call client getSpentInfo and give result', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getSpentInfo = sinon.stub().callsArgWith(1, null, {
         result: {
           txid: 'txid',
@@ -4941,7 +4941,7 @@ describe('aipgcoin Service', function() {
 
   describe('#getInfo', function() {
     it('will give rpc error', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var getInfo = sinon.stub().callsArgWith(0, {message: 'error', code: -1});
       aipgd.nodes.push({
         client: {
@@ -4955,7 +4955,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will call client getInfo and give result', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.node.getNetworkName = sinon.stub().returns('testnet');
       var getNetworkInfo = sinon.stub().callsArgWith(0, null, {
 		result: {
@@ -5008,7 +5008,7 @@ describe('aipgcoin Service', function() {
 
   describe('#generateBlock', function() {
     it('will give rpc error', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var generate = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
       aipgd.nodes.push({
         client: {
@@ -5022,7 +5022,7 @@ describe('aipgcoin Service', function() {
       });
     });
     it('will call client generate and give result', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       var generate = sinon.stub().callsArgWith(1, null, {
         result: ['hash']
       });
@@ -5044,11 +5044,11 @@ describe('aipgcoin Service', function() {
 
   describe('#stop', function() {
     it('will callback if spawn is not set', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.stop(done);
     });
     it('will exit spawned process', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.spawn = {};
       aipgd.spawn.process = new EventEmitter();
       aipgd.spawn.process.kill = sinon.stub();
@@ -5058,7 +5058,7 @@ describe('aipgcoin Service', function() {
       aipgd.spawn.process.emit('exit', 0);
     });
     it('will give error with non-zero exit status code', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.spawn = {};
       aipgd.spawn.process = new EventEmitter();
       aipgd.spawn.process.kill = sinon.stub();
@@ -5072,7 +5072,7 @@ describe('aipgcoin Service', function() {
       aipgd.spawn.process.emit('exit', 1);
     });
     it('will stop after timeout', function(done) {
-      var aipgd = new aipgcoinService(baseConfig);
+      var aipgd = new aipgService(baseConfig);
       aipgd.shutdownTimeout = 300;
       aipgd.spawn = {};
       aipgd.spawn.process = new EventEmitter();
