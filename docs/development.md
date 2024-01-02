@@ -18,14 +18,14 @@ git clone git@github.com:<yourusername>/aipgcore-node.git
 git clone git@github.com:<yourusername>/aipgcore-lib.git
 ```
 
-To develop aipgcoin or to compile from source:
+To develop aipg or to compile from source:
 
 ```bash
-git clone git@github.com:<yourusername>/aipgcoin.git
+git clone git@github.com:<yourusername>/aipg.git
 git fetch origin <branchname>:<branchname>
 git checkout <branchname>
 ```
-**Note**: See aipgcoin documentation for building aipgcoin on your platform.
+**Note**: See aipg documentation for building aipg on your platform.
 
 
 ## Install Development Dependencies
@@ -51,7 +51,7 @@ npm install
 cd ../aipgcore-node
 npm install
 ```
-**Note**: If you get a message about not being able to download aipgcoin distribution, you'll need to compile aipgd from source, and setup your configuration to use that version.
+**Note**: If you get a message about not being able to download aipg distribution, you'll need to compile aipgd from source, and setup your configuration to use that version.
 
 
 We now will setup symlinks in `aipgcore-node` *(repeat this for any other modules you're planning on developing)*:
@@ -63,10 +63,10 @@ rm -rf aipgd-rpc
 ln -s ~/aipgd-rpc
 ```
 
-And if you're compiling or developing aipgcoin:
+And if you're compiling or developing aipg:
 ```bash
 cd ../bin
-ln -sf ~/aipgcoin/src/aipgd
+ln -sf ~/aipg/src/aipgd
 ```
 
 ## Run Tests
@@ -122,7 +122,7 @@ Edit `aipgcore-node.json` with something similar to:
     "aipgd": {
       "spawn": {
         "datadir": "/home/<youruser>/.aipgd",
-        "exec": "/home/<youruser>/aipgcoin/src/aipgd"
+        "exec": "/home/<youruser>/aipg/src/aipgd"
       }
     }
   }
@@ -152,7 +152,7 @@ spentindex=1
 zmqpubrawtx=tcp://127.0.0.1:28332
 zmqpubhashblock=tcp://127.0.0.1:28332
 rpcallowip=127.0.0.1
-rpcuser=aipgcoin
+rpcuser=aipg
 rpcpassword=local321
 ```
 
