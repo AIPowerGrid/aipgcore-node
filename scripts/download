@@ -18,7 +18,7 @@ tag="v2.5.1"
 #elif [ "${platform}" == "darwin" ]; then
 #    tarball_name="aipg-${version}-osx64.tar.gz"
 #else
-#    echo "aipgcoin binary distribution not available for platform and architecture"
+#    echo "aipg binary distribution not available for platform and architecture"
 #    exit -1
 #fi
 
@@ -31,7 +31,7 @@ download_aipgd() {
 
     cd "${root_dir}/bin"
 
-    echo " aipgcoin: ${binary_url}"
+    echo " aipg: ${binary_url}"
 
     is_curl=true
     if hash curl 2>/dev/null; then
@@ -50,7 +50,7 @@ download_aipgd() {
             wget $shasums_url
         fi
         if test -e "${tarball_name}"; then
-            echo "Unpacking aipgcoin distribution"
+            echo "Unpacking aipg distribution"
             tar -xvzf $tarball_name
             if test $? -eq 0; then
                 ln -sf "aipg-${version}/bin/aipgd"
@@ -58,12 +58,12 @@ download_aipgd() {
             fi
         fi
     fi
-    echo "aipgcoin binary distribution could not be downloaded"
+    echo "aipg binary distribution could not be downloaded"
     exit -1
 }
 
 verify_download() {
-    echo "Verifying signatures of aipgcoin download"
+    echo "Verifying signatures of aipg download"
     gpg --verify "${root_dir}/bin/SHA256SUMS.asc"
 
     if hash shasum 2>/dev/null; then
@@ -87,11 +87,11 @@ verify_download() {
 download=1
 verify=0
 
-if [ "${SKIP_aipgCOIN_DOWNLOAD}" = 1 ]; then
+if [ "${SKIP_AIPG_DOWNLOAD}" = 1 ]; then
     download=0;
 fi
 
-if [ "${VERIFY_aipgCOIN_DOWNLOAD}" = 1 ]; then
+if [ "${VERIFY_AIPG_DOWNLOAD}" = 1 ]; then
     verify=1;
 fi
 
@@ -100,10 +100,10 @@ while [ -n "$1" ]; do
   value="$2"
 
   case $param in
-    --skip-aipgcoin-download)
+    --skip-aipg-download)
           download=0
           ;;
-    --verify-aipgcoin-download)
+    --verify-aipg-download)
           verify=1
           ;;
   esac
