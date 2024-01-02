@@ -3,7 +3,7 @@
 var should = require('chai').should();
 var sinon = require('sinon');
 var proxyquire = require('proxyquire');
-var aipgcoinService = require('../../lib/services/aipgd');
+var aipgService = require('../../lib/services/aipgd');
 var index = require('../../lib');
 var log = index.log;
 
@@ -24,7 +24,7 @@ describe('#start', function() {
       var TestNode = function(options) {
         options.services[0].should.deep.equal({
           name: 'aipgd',
-          module: aipgcoinService,
+          module: aipgService,
           config: {
             spawn: {
               datadir: './data'
@@ -92,7 +92,7 @@ describe('#start', function() {
       var TestNode = function(options) {
         options.services[0].should.deep.equal({
           name: 'aipgd',
-          module: aipgcoinService,
+          module: aipgService,
           config: {
             param: 'test',
             spawn: {
